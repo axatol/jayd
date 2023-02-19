@@ -34,5 +34,5 @@ jobs:
 
       - uses: axatol/actions/docker-build-push@release
         with:
-          image: public.ecr.aws/axatol/huisheng
+          image: ${{ env.image }}
           use-cache: false
