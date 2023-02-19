@@ -6,5 +6,4 @@ type ListResponse[T any] struct {
 	Items []T    `json:"items"`
 }
 
-type Client struct {
-}
+type Client struct{}

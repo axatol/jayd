@@ -67,10 +67,10 @@ func execYoutubeDownloader(videoID string, format string) error {
 
 	args := []string{target}
 	switch format {
-	case "audio":
+	case FormatAudio:
 		args = append(args, ytdlpExecArguments...)
 		args = append(args, ytdlpExecAudioArguments...)
-	case "video":
+	case FormatVideo:
 		args = append(args, ytdlpExecArguments...)
 		args = append(args, ytdlpExecVideoArguments...)
 	default:
