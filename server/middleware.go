@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"runtime/debug"
+	"strings"
 	"time"
 
 	jwtmiddleware "github.com/auth0/go-jwt-middleware/v2"
@@ -23,7 +24,24 @@ func middleware_ContentType(next http.Handler) http.Handler {
 }
 
 func middleware_CORS(next http.Handler) http.Handler {
+	list := strings.Split(config.ServerCORSList, ",")
+	if len(config.ServerCORSList) < 1 {
+		log.Warn().
+			Strs("cors_list", list).
+			Msg("skipping CORS middleware configuration")
+		return next
+	}
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
+		for _, host := range list {
+			if strings.Contains(host, r.Host) {
+				w.Header().Set("Access-Control-Allow-Origin", host)
+				break
+			}
+		}
+
 		next.ServeHTTP(w, r)
 	})
 }

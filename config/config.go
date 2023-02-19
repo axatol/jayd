@@ -16,6 +16,7 @@ var (
 var (
 	Debug                     = envValue("DEBUG", "false") == "true"
 	ServerAddress             = envValue("SERVER_ADDRESS", ":8000")
+	ServerCORSList            = envValue("SERVER_CORS_LIST", "")
 	DownloaderExecutable      = envValue("DOWNLOADER_EXECUTABLE", "yt-dlp")
 	DownloaderOutputDirectory = envValue("DOWNLOADER_OUTPUT_DIR", "/data/output")
 	DownloaderCacheDirectory  = envValue("DOWNLOADER_CACHE_DIR", "/data/cache")
@@ -29,6 +30,7 @@ var (
 func init() {
 	flag.BoolVar(&Debug, "debug", Debug, "enable debug mode")
 	flag.StringVar(&ServerAddress, "server-address", ServerAddress, "enable debug mode")
+	flag.StringVar(&ServerCORSList, "server-cors-list", ServerCORSList, "server cors list")
 	flag.StringVar(&DownloaderExecutable, "downloader-executable", DownloaderExecutable, "downloader executable")
 	flag.StringVar(&DownloaderOutputDirectory, "downloader-output-directory", DownloaderOutputDirectory, "downloader output directory")
 	flag.StringVar(&DownloaderCacheDirectory, "downloader-cache-directory", DownloaderCacheDirectory, "downloader cache directory")

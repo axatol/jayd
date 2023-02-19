@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 )
@@ -42,4 +43,13 @@ func envValueInt(envKey string, fallback ...int) int {
 	}
 
 	return result
+}
+
+func envValueList(envKey string) []string {
+	value := envValue(envKey, "")
+	if value == "" {
+		return []string{}
+	}
+
+	return strings.Split(value, ",")
 }
