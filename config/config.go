@@ -21,7 +21,7 @@ var (
 	DownloaderCacheDirectory  = envValue("DOWNLOADER_CACHE_DIR", "/data/cache")
 	DownloaderRetries         = envValueInt("DOWNLOADER_RETRIES", 3)
 	DownloaderConcurrency     = envValueInt("DOWNLOADER_CONCURRENCY", 1)
-	YoutubeAPIKey             = envValue("YOUTUBE_API_KEY", "/data/cache")
+	YoutubeAPIKey             = envValue("YOUTUBE_API_KEY")
 )
 
 func init() {

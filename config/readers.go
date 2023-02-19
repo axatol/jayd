@@ -21,7 +21,6 @@ func envValue(envKey string, fallback ...string) string {
 		return fallback[0]
 	}
 
-	log.Fatal().Str("key", envKey).Msg("required environment variable not available")
 	return ""
 }
 

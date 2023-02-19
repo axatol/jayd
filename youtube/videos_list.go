@@ -33,6 +33,10 @@ type Video struct {
 }
 
 func (c *Client) Video(ctx context.Context, id string) (*Video, error) {
+	if config.YoutubeAPIKey == "" {
+		return nil, fmt.Errorf("youtube api key is not available")
+	}
+
 	target := fmt.Sprintf(
 		"https://www.googleapis.com/youtube/v3/videos?key=%s&id=%s&part=%s",
 		config.YoutubeAPIKey,
