@@ -13,32 +13,26 @@ var (
 	envFile, _ = godotenv.Read()
 )
 
-func envValue(envKey string, fallback ...string) string {
-	value, ok := os.LookupEnv(envKey)
-	if ok {
-		return value
-	}
-
-	if value, ok := envFile[envKey]; ok {
-		return value
-	}
-
-	if len(fallback) == 1 {
-		return fallback[0]
-	}
-
-	log.Fatal().Str("key", envKey).Msg("required environment variable not available")
-	return ""
-}
-
 var (
-	Debug         = envValue("DEBUG", "false") == "true"
-	ServerAddress = envValue("SERVER_ADDRESS", ":8000")
+	Debug                     = envValue("DEBUG", "false") == "true"
+	ServerAddress             = envValue("SERVER_ADDRESS", ":8000")
+	DownloaderExecutable      = envValue("DOWNLOADER_EXECUTABLE", "yt-dlp")
+	DownloaderOutputDirectory = envValue("DOWNLOADER_OUTPUT_DIR", "/data/output")
+	DownloaderCacheDirectory  = envValue("DOWNLOADER_CACHE_DIR", "/data/cache")
+	DownloaderRetries         = envValueInt("DOWNLOADER_RETRIES", 3)
+	DownloaderConcurrency     = envValueInt("DOWNLOADER_CONCURRENCY", 1)
+	YoutubeAPIKey             = envValue("YOUTUBE_API_KEY", "/data/cache")
 )
 
 func init() {
-	flag.BoolVar(&Debug, "debug", false, "enable debug mode")
-	flag.StringVar(&ServerAddress, "server-address", ":8000", "enable debug mode")
+	flag.BoolVar(&Debug, "debug", Debug, "enable debug mode")
+	flag.StringVar(&ServerAddress, "server-address", ServerAddress, "enable debug mode")
+	flag.StringVar(&DownloaderExecutable, "downloader-executable", DownloaderExecutable, "downloader executable")
+	flag.StringVar(&DownloaderOutputDirectory, "downloader-output-directory", DownloaderOutputDirectory, "downloader output directory")
+	flag.StringVar(&DownloaderCacheDirectory, "downloader-cache-directory", DownloaderCacheDirectory, "downloader cache directory")
+	flag.IntVar(&DownloaderRetries, "downloader-retries", DownloaderRetries, "downloader retries")
+	flag.IntVar(&DownloaderConcurrency, "downloader-concurrency", DownloaderConcurrency, "downloader concurrency")
+	flag.StringVar(&YoutubeAPIKey, "youtube-api-key", YoutubeAPIKey, "youtube api key")
 	flag.Parse()
 
 	if Debug {

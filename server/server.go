@@ -21,9 +21,9 @@ func Init() chi.Router {
 	r.Use(middleware.Timeout(time.Second * 30))
 
 	r.Route("/api", func(r chi.Router) {
-		// TODO - r.Use(pagination)
-		// r.Get("/events", getEvents)
-		// r.Post("/events", createEvents)
+		r.Get("/video/metadata", handler_GetVideoMetadata)
+		r.Get("/video", handler_GetVideoFile)
+		r.Post("/video", handler_QueueVideoDownload)
 	})
 
 	return r

@@ -9,8 +9,6 @@ import (
 )
 
 func main() {
-	// ctx := context.Background()
-
 	router := server.Init()
 
 	log.Info().
@@ -19,6 +17,6 @@ func main() {
 		Msg("starting server")
 
 	if err := http.ListenAndServe(config.ServerAddress, router); err != nil {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Send()
 	}
 }
