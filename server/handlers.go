@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -14,11 +13,6 @@ import (
 
 var (
 	yt youtube.Client
-
-	err_MissingTarget = fmt.Errorf("missing target")
-	err_InvalidFormat = fmt.Errorf("invalid format")
-	err_InvalidTarget = fmt.Errorf("invalid target")
-	err_FailedRequest = fmt.Errorf("failed request")
 )
 
 func handler_GetVideoMetadata(w http.ResponseWriter, r *http.Request) {

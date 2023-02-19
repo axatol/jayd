@@ -22,6 +22,8 @@ var (
 	DownloaderRetries         = envValueInt("DOWNLOADER_RETRIES", 3)
 	DownloaderConcurrency     = envValueInt("DOWNLOADER_CONCURRENCY", 1)
 	YoutubeAPIKey             = envValue("YOUTUBE_API_KEY")
+	Auth0Domain               = envValue("AUTH0_DOMAIN", "")
+	Auth0Audience             = envValue("AUTH0_AUDIENCE", "")
 )
 
 func init() {
@@ -33,6 +35,8 @@ func init() {
 	flag.IntVar(&DownloaderRetries, "downloader-retries", DownloaderRetries, "downloader retries")
 	flag.IntVar(&DownloaderConcurrency, "downloader-concurrency", DownloaderConcurrency, "downloader concurrency")
 	flag.StringVar(&YoutubeAPIKey, "youtube-api-key", YoutubeAPIKey, "youtube api key")
+	flag.StringVar(&Auth0Domain, "auth0-domain", Auth0Domain, "auth0 domain")
+	flag.StringVar(&Auth0Audience, "auth0-audience", Auth0Audience, "auth0 audience")
 	flag.Parse()
 
 	if Debug {
