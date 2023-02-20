@@ -20,7 +20,7 @@ var (
 	DownloaderExecutable      = envValue("DOWNLOADER_EXECUTABLE", "yt-dlp")
 	DownloaderOutputDirectory = envValue("DOWNLOADER_OUTPUT_DIR", "/data/output")
 	DownloaderCacheDirectory  = envValue("DOWNLOADER_CACHE_DIR", "/data/cache")
-	DownloaderRetries         = envValueInt("DOWNLOADER_RETRIES", 3)
+	DownloaderRetries         = envValueInt("DOWNLOADER_RETRIES", 1)
 	DownloaderConcurrency     = envValueInt("DOWNLOADER_CONCURRENCY", 1)
 	YoutubeAPIKey             = envValue("YOUTUBE_API_KEY")
 	Auth0Domain               = envValue("AUTH0_DOMAIN", "")

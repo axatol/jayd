@@ -18,6 +18,10 @@ type URLQuery struct {
 }
 
 func ParseURL(input string) (*URLQuery, error) {
+	if patternValidateVideoID.MatchString(input) {
+		return &URLQuery{VideoID: input}, nil
+	}
+
 	normalised := input
 	normalised = strings.Replace(normalised, "music.youtube.com", "youtube.com", 1)
 	normalised = strings.Replace(normalised, "youtu.be/", "youtube.com/watch?v=", 1)

@@ -25,6 +25,7 @@ func Init() chi.Router {
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/youtube/metadata", handler_GetVideoMetadata)
 		r.Post("/youtube", handler_QueueVideoDownload)
+		r.Get("/queue/status", handler_GetQueueItemStatus)
 		r.Get("/queue", handler_ListDownloadQueue)
 	})
 

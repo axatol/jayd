@@ -54,8 +54,8 @@ func handler_QueueVideoDownload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	format := (downloader.Format)(r.URL.Query().Get("format"))
-	if !format.Valid() {
+	format := r.URL.Query().Get("format")
+	if format == "" {
 		responseErr(w, err_InvalidFormat, http.StatusBadRequest)
 		return
 	}
@@ -74,14 +74,63 @@ func handler_QueueVideoDownload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go downloader.Download(metadata.VideoID, string(format))
+	info, err := downloader.GetInfoJSON(metadata.VideoID)
+	if err != nil {
+		log.Error().Err(err).Str("target", info.ID).Msg("failed to fetch metadata")
+		responseErr(w, err_FetchMetadata, http.StatusBadRequest)
+		return
+	}
 
-	log.Debug().Str("id", metadata.VideoID).Msg("queued download")
+	exists := false
+	for _, cached := range info.Formats {
+		if cached.FormatID == format {
+			exists = true
+			break
+		}
+	}
+
+	if format != downloader.FormatDefaultAudio && format != downloader.FormatDefaultVideo && !exists {
+		log.Error().Err(err).Str("target", info.ID).Str("format", format).Msg("invalid format")
+		responseErr(w, err_InvalidFormat, http.StatusBadRequest)
+		return
+	}
+
+	go func() {
+		if err := downloader.Download(*info, format); err != nil {
+			log.Error().Err(err).Str("target", info.ID).Msg("failed to download")
+		}
+	}()
+
+	log.Debug().Str("target", info.ID).Msg("queued download")
 	responseOk[any](w, nil)
 }
 
+func handler_GetQueueItemStatus(w http.ResponseWriter, r *http.Request) {
+	target := r.URL.Query().Get("target")
+	if target == "" {
+		responseErr(w, err_MissingTarget, http.StatusBadRequest)
+		return
+	}
+
+	unescaped, err := url.QueryUnescape(target)
+	if err != nil {
+		log.Error().Str("target", target).Err(err).Msg("failed to unescape target")
+		responseErr(w, err_InvalidTarget, http.StatusBadRequest)
+		return
+	}
+
+	metadata, err := youtube.ParseURL(unescaped)
+	if err != nil {
+		log.Error().Str("unescaped", unescaped).Err(err).Msg("failed to parse unescaped url")
+		responseErr(w, err_InvalidTarget, http.StatusBadRequest)
+		return
+	}
+
+	responseOk(w, downloader.HasJob(metadata.VideoID))
+}
+
 func handler_ListDownloadQueue(w http.ResponseWriter, r *http.Request) {
-	responseOk(w, downloader.Jobs.Entries())
+	responseOk(w, downloader.Jobs())
 }
 
 func handler_StaticContent(root string) http.HandlerFunc {
