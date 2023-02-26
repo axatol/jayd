@@ -10,20 +10,12 @@ import (
 )
 
 var (
-	jobs Queue
+	History Queue
 )
 
-func Jobs() []QueueItem {
-	return jobs.Entries()
-}
-
-func GetJob(videoID string, formatID string) []QueueItem {
-	return jobs.Get(videoID, formatID)
-}
-
 func Download(info InfoJSON, formatID string) error {
-	jobs.Add(info, formatID)
-	defer jobs.SetCompleted(info.ID, formatID)
+	History.Add(info, formatID)
+	defer History.SetCompleted(info.ID, formatID)
 
 	log.Debug().
 		Str("video_id", info.ID).
@@ -32,7 +24,7 @@ func Download(info InfoJSON, formatID string) error {
 
 	err := execYoutubeDownloader(info.ID, formatID)
 	if err != nil {
-		jobs.SetFailed(info.ID, formatID)
+		History.SetFailed(info.ID, formatID)
 	}
 
 	log.Debug().Err(err).

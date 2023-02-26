@@ -104,7 +104,7 @@ func handler_QueueVideoDownload(w http.ResponseWriter, r *http.Request) {
 func handler_ListDownloadQueue(w http.ResponseWriter, r *http.Request) {
 	target := r.URL.Query().Get("target")
 	if target == "" {
-		responseOk(w, downloader.Jobs())
+		responseOk(w, downloader.History.Entries())
 		return
 	}
 
@@ -122,13 +122,44 @@ func handler_ListDownloadQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	job := downloader.GetJob(metadata.VideoID, r.URL.Query().Get("format"))
-	if job == nil {
+	items := downloader.History.Get(metadata.VideoID, r.URL.Query().Get("format"))
+	if items == nil {
 		responseErr(w, err_NotFound, http.StatusNotFound)
 		return
 	}
 
-	responseOk(w, job)
+	responseOk(w, items)
+}
+
+func handler_DeleteDownloadQueueItem(w http.ResponseWriter, r *http.Request) {
+	target := r.URL.Query().Get("target")
+	if target == "" {
+		responseErr(w, err_MissingTarget, http.StatusBadRequest)
+		return
+	}
+
+	format := r.URL.Query().Get("format")
+	if format == "" {
+		responseErr(w, err_MissingFormat, http.StatusBadRequest)
+		return
+	}
+
+	unescaped, err := url.QueryUnescape(target)
+	if err != nil {
+		log.Error().Str("target", target).Err(err).Msg("failed to unescape target")
+		responseErr(w, err_InvalidTarget, http.StatusBadRequest)
+		return
+	}
+
+	metadata, err := youtube.ParseURL(unescaped)
+	if err != nil {
+		log.Error().Str("unescaped", unescaped).Err(err).Msg("failed to parse unescaped url")
+		responseErr(w, err_InvalidTarget, http.StatusBadRequest)
+		return
+	}
+
+	downloader.History.Remove(metadata.VideoID, format)
+	responseOk[any](w, nil)
 }
 
 func handler_StaticContent(root string) http.HandlerFunc {

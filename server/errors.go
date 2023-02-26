@@ -3,6 +3,7 @@ package server
 import "fmt"
 
 var (
+	err_MissingFormat = fmt.Errorf("missing format")
 	err_MissingTarget = fmt.Errorf("missing target")
 	err_InvalidFormat = fmt.Errorf("invalid format")
 	err_InvalidTarget = fmt.Errorf("invalid target")

@@ -46,7 +46,7 @@ export const SearchForm = (props: SearchFormProps) => {
           name="target"
           rules={[{ required: true }, { type: "url" }]}
         >
-          <Input />
+          <Input placeholder="Youtube video URL, e.g. https://youtube.com/watch?v=dQw4w9WgXcQ" />
         </Form.Item>
 
         <Form.Item wrapperCol={{ offset: 8 }} style={{ marginBottom: 0 }}>

@@ -15,6 +15,7 @@ var (
 
 var (
 	Debug                     = envValue("DEBUG", "false") == "true"
+	ServerBackupFile          = envValue("SERVER_BACKUP_FILE", "/data/history.json")
 	ServerAddress             = envValue("SERVER_ADDRESS", ":8000")
 	ServerCORSList            = envValue("SERVER_CORS_LIST", "")
 	DownloaderExecutable      = envValue("DOWNLOADER_EXECUTABLE", "yt-dlp")
@@ -25,10 +26,12 @@ var (
 	YoutubeAPIKey             = envValue("YOUTUBE_API_KEY")
 	Auth0Domain               = envValue("AUTH0_DOMAIN", "")
 	Auth0Audience             = envValue("AUTH0_AUDIENCE", "")
+	WebDirectory              = envValue("WEB_DIRECTORY", "/web")
 )
 
 func init() {
 	flag.BoolVar(&Debug, "debug", Debug, "enable debug mode")
+	flag.StringVar(&ServerBackupFile, "server-backup-file", ServerBackupFile, "server backup file")
 	flag.StringVar(&ServerAddress, "server-address", ServerAddress, "enable debug mode")
 	flag.StringVar(&ServerCORSList, "server-cors-list", ServerCORSList, "server cors list")
 	flag.StringVar(&DownloaderExecutable, "downloader-executable", DownloaderExecutable, "downloader executable")
@@ -39,6 +42,7 @@ func init() {
 	flag.StringVar(&YoutubeAPIKey, "youtube-api-key", YoutubeAPIKey, "youtube api key")
 	flag.StringVar(&Auth0Domain, "auth0-domain", Auth0Domain, "auth0 domain")
 	flag.StringVar(&Auth0Audience, "auth0-audience", Auth0Audience, "auth0 audience")
+	flag.StringVar(&WebDirectory, "web-directory", WebDirectory, "web directory")
 	flag.Parse()
 
 	if Debug {

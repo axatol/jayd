@@ -60,12 +60,17 @@ export const useAPI = () => {
       .post("/api/youtube", null, { params: { target, format } })
       .then((result) => result.data);
 
-  const getQueueItem = (target: string) =>
+  const getQueueItem = (target: string, format?: string) =>
     api
       .get<APIResponse<QueueItemWithoutFormat[]>>("/api/queue", {
-        params: { target },
+        params: { target, format },
       })
       .then((result) => result.data.data.map(mapItemFormat));
+
+  const deleteQueueItem = (target: string, format: string) =>
+    api
+      .delete<APIResponse<null>>("/api/queue", { params: { target, format } })
+      .then((result) => result.data);
 
   const getQueue = () =>
     api
@@ -80,6 +85,7 @@ export const useAPI = () => {
     beginDownload,
     getQueue,
     getQueueItem,
+    deleteQueueItem,
     staticFile,
   };
 };

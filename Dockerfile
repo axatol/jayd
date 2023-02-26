@@ -1,3 +1,21 @@
+FROM node:18 as web
+WORKDIR /app
+COPY ./package.json ./package-lock.json ./
+COPY ./web/package.json ./web/package.json
+RUN npm install
+COPY ./web ./web
+
+ARG AUTH0_DOMAIN
+ARG AUTH0_CLIENT_ID
+ARG API_URL
+ARG API_AUDIENCE
+ENV VITE_AUTH0_DOMAIN=${AUTH0_DOMAIN}
+ENV VITE_AUTH0_CLIENT_ID=${AUTH0_CLIENT_ID}
+ENV VITE_API_URL=${API_URL}
+ENV VITE_API_AUDIENCE=${API_AUDIENCE}
+
+RUN npm run web:build
+
 FROM golang:1.19 as build
 ENV CGO_ENABLED=0
 ENV GOOS=linux
@@ -25,4 +43,5 @@ WORKDIR /go/app
 RUN adduser --disabled-password --gecos "" --uid 1000 default
 USER default
 COPY --from=build --chown=default /bin/app /bin/app
+COPY --from=web --chown=default /app/web/dist /web
 ENTRYPOINT [ "/bin/app" ]

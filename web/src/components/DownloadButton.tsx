@@ -53,7 +53,7 @@ export const DownloadButton = ({
   return (
     <Button
       {...props}
-      loading={loading}
+      loading={props.loading ?? loading}
       onClick={download}
       type="primary"
       shape="round"

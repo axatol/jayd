@@ -1,8 +1,9 @@
-import { WarningOutlined } from "@ant-design/icons";
-import { Table, Image, Card, Tag, Tooltip } from "antd";
+import { DeleteOutlined, WarningOutlined } from "@ant-design/icons";
+import { Table, Image, Card, Tag, Tooltip, Space, Button } from "antd";
 
 import { DownloadButton } from "./DownloadButton";
 import { YoutubeChannelLink, YoutubeVideoLink } from "./Links";
+import { useAPI } from "../lib/api";
 import { QueueItem, VideoFormat } from "../lib/types";
 
 export const QueueTable = (props: { queue?: QueueItem[] }) => (
@@ -65,6 +66,7 @@ export const QueueTable = (props: { queue?: QueueItem[] }) => (
 
 const Actions = (props: { item: QueueItem }) => {
   const { is_completed, is_failed, format, data } = props.item;
+  const api = useAPI();
 
   if (is_failed || !format) {
     return (
@@ -81,10 +83,19 @@ const Actions = (props: { item: QueueItem }) => {
   const filename = `${data.id}_${format_id}.${ext}`;
 
   return (
-    <DownloadButton
-      loading={!is_completed ? true : undefined}
-      href={filename}
-    />
+    <Space>
+      <DownloadButton
+        loading={!is_completed ? true : undefined}
+        href={filename}
+      />
+
+      <Button
+        danger
+        icon={<DeleteOutlined />}
+        shape="circle"
+        onClick={() => api.deleteQueueItem(data.id, format.format_id)}
+      />
+    </Space>
   );
 };
 
