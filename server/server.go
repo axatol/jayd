@@ -13,7 +13,6 @@ var (
 )
 
 func Init() chi.Router {
-	r.Use(middleware_ContentType)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.RequestID)
 	r.Use(middleware_CORS)
@@ -21,11 +20,12 @@ func Init() chi.Router {
 	r.Use(middleware_Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(time.Second * 30))
+	r.Use(middleware.Compress(5))
 
 	r.Route("/api", func(r chi.Router) {
+		r.Use(middleware_ContentType)
 		r.Get("/youtube/metadata", handler_GetVideoMetadata)
 		r.Post("/youtube", handler_QueueVideoDownload)
-		r.Get("/queue/status", handler_GetQueueItemStatus)
 		r.Get("/queue", handler_ListDownloadQueue)
 	})
 

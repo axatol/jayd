@@ -1,6 +1,7 @@
 package downloader
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os/exec"
@@ -26,6 +27,7 @@ type InfoJSON struct {
 	Thumbnail      string   `json:"thumbnail"`
 	Description    string   `json:"description"`
 	Uploader       string   `json:"uploader"`
+	UploaderID     string   `json:"uploader_id"`
 	Duration       int      `json:"duration"`
 	DurationString string   `json:"duration_string"`
 }
@@ -34,14 +36,14 @@ var (
 	infoCache = map[string]InfoJSON{}
 )
 
-func GetInfoJSON(videoID string) (*InfoJSON, error) {
+func GetInfoJSON(ctx context.Context, videoID string) (*InfoJSON, error) {
 	if value, ok := infoCache[videoID]; ok {
 		log.Debug().Str("video_id", videoID).Msg("retrieved info json from cache")
 		return &value, nil
 	}
 
 	target := fmt.Sprintf("https://youtube.com/watch?v=%s", videoID)
-	cmd := exec.Command(config.DownloaderExecutable, target, "--dump-json", "--skip-download")
+	cmd := exec.CommandContext(ctx, config.DownloaderExecutable, target, "--dump-json", "--skip-download")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Error().Err(err).Str("stderr", string(output)).Msg("youtube downloader execution failed")

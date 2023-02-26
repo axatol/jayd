@@ -13,6 +13,7 @@ import (
 	"github.com/auth0/go-jwt-middleware/v2/validator"
 	"github.com/axatol/jayd/config"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/rs/zerolog/log"
 )
 
@@ -24,26 +25,14 @@ func middleware_ContentType(next http.Handler) http.Handler {
 }
 
 func middleware_CORS(next http.Handler) http.Handler {
-	list := strings.Split(config.ServerCORSList, ",")
-	if len(config.ServerCORSList) < 1 {
-		log.Warn().
-			Strs("cors_list", list).
-			Msg("skipping CORS middleware configuration")
-		return next
+	options := cors.Options{
+		AllowedOrigins:   strings.Split(config.ServerCORSList, ","),
+		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodOptions},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+		AllowCredentials: false,
 	}
 
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
-		for _, host := range list {
-			if strings.Contains(host, r.Host) {
-				w.Header().Set("Access-Control-Allow-Origin", host)
-				break
-			}
-		}
-
-		next.ServeHTTP(w, r)
-	})
+	return cors.Handler(options)(next)
 }
 
 func middleware_JWT(next http.Handler) http.Handler {
@@ -102,7 +91,7 @@ func middleware_Logger(next http.Handler) http.Handler {
 			url := fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI)
 
 			if rec := recover(); rec != nil {
-				event = event.
+				event = log.Error().
 					Interface("recovery", rec).
 					Bytes("stack", debug.Stack())
 			}
@@ -115,6 +104,7 @@ func middleware_Logger(next http.Handler) http.Handler {
 				Dur("duration", time.Since(start)).
 				Int("bytes_written", ww.BytesWritten()).
 				Str("remote_addr", r.RemoteAddr).
+				Str("origin", r.Header.Get("Origin")).
 				Str("request_id", (requestID).(string)).
 				Send()
 		}()

@@ -9,4 +9,5 @@ var (
 	err_FailedRequest = fmt.Errorf("failed request")
 	err_Unauthorised  = fmt.Errorf("unauthorised")
 	err_FetchMetadata = fmt.Errorf("failed to fetch metadata")
+	err_NotFound      = fmt.Errorf("item was not found")
 )

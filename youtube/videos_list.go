@@ -10,7 +10,7 @@ import (
 	"github.com/axatol/jayd/config"
 )
 
-type Video struct {
+type YoutubeVideo struct {
 	Kind    string `json:"kind"`
 	ETag    string `json:"etag"`
 	ID      string `json:"id"`
@@ -30,6 +30,16 @@ type Video struct {
 	ContentDetails struct {
 		Duration string `json:"duration"`
 	} `json:"contentDetails"`
+}
+
+type Video struct {
+	ID           string `json:"id"`
+	Title        string `json:"title"`
+	ChannelID    string `json:"channel_id"`
+	ChannelTitle string `json:"channel_title"`
+	Description  string `json:"description"`
+	ThumbnailURL string `json:"thumnail_url"`
+	Duration     int64  `json:"duration"`
 }
 
 func (c *Client) Video(ctx context.Context, id string) (*Video, error) {
@@ -59,7 +69,7 @@ func (c *Client) Video(ctx context.Context, id string) (*Video, error) {
 		return nil, err
 	}
 
-	var parsed ListResponse[Video]
+	var parsed ListResponse[YoutubeVideo]
 	if err := json.Unmarshal(raw, &parsed); err != nil {
 		return nil, err
 	}
@@ -68,5 +78,21 @@ func (c *Client) Video(ctx context.Context, id string) (*Video, error) {
 		return nil, fmt.Errorf("no results")
 	}
 
-	return &parsed.Items[0], nil
+	item := parsed.Items[0]
+	duration, err := ParseDuration(item.ContentDetails.Duration)
+	if err != nil {
+		return nil, err
+	}
+
+	video := Video{
+		ID:           item.ID,
+		Title:        item.Snippet.Title,
+		ChannelID:    item.Snippet.ChannelID,
+		ChannelTitle: item.Snippet.ChannelTitle,
+		Description:  item.Snippet.Description,
+		ThumbnailURL: item.Snippet.Thumbnails.Default.URL,
+		Duration:     duration,
+	}
+
+	return &video, nil
 }

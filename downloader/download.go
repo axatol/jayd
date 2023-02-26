@@ -13,32 +13,32 @@ var (
 	jobs Queue
 )
 
-func Jobs() []InfoJSON {
+func Jobs() []QueueItem {
 	return jobs.Entries()
 }
 
-func HasJob(id string) bool {
-	return jobs.Has(id)
+func GetJob(videoID string, formatID string) []QueueItem {
+	return jobs.Get(videoID, formatID)
 }
 
 func Download(info InfoJSON, formatID string) error {
-	jobs.Add(info)
-	defer jobs.Remove(info.ID)
+	jobs.Add(info, formatID)
+	defer jobs.SetCompleted(info.ID, formatID)
 
 	log.Debug().
 		Str("video_id", info.ID).
-		Str("format", formatID).
+		Str("format_id", formatID).
 		Msg("downloading")
 
 	err := execYoutubeDownloader(info.ID, formatID)
 	if err != nil {
-		return err
+		jobs.SetFailed(info.ID, formatID)
 	}
 
 	log.Debug().Err(err).
 		Str("video_id", info.ID).
-		Str("format", formatID).
-		Msg("download complete")
+		Str("format_id", formatID).
+		Msg("downloaded")
 	return nil
 }
 
@@ -63,8 +63,8 @@ var (
 		// filesystem options
 		"--paths",
 		config.DownloaderOutputDirectory,
-		"--output",
-		"%(id)s.%(ext)s",
+		// "--output",
+		// "%(id)s.%(ext)s",
 		"--no-overwrites",
 		"--continue",
 		"--no-write-info-json",
@@ -104,8 +104,8 @@ var (
 
 func execYoutubeDownloader(videoID string, formatID string) error {
 	target := fmt.Sprintf("https://youtube.com/watch?v=%s", videoID)
-
-	args := []string{target}
+	outputTemplate := fmt.Sprintf("%s_%s.%s", "%(id)s", formatID, "%(ext)s")
+	args := []string{target, "--output", outputTemplate}
 	args = append(args, ytdlpExecArguments...)
 	switch formatID {
 	case FormatDefaultAudio:
@@ -119,7 +119,10 @@ func execYoutubeDownloader(videoID string, formatID string) error {
 	cmd := exec.Command(config.DownloaderExecutable, args...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Error().Err(err).Str("stderr", string(output)).Msg("youtube downloader execution failed")
+		log.Error().
+			Err(err).
+			Str("output", string(output)).
+			Msg("youtube downloader execution failed")
 		return err
 	}
 
