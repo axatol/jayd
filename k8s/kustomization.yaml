@@ -1,0 +1,17 @@
+namespace: jayd
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+resources:
+  - ./namespace.yaml
+  - ./deployment.yaml
+  - ./networking.yaml
+
+secretGenerator:
+  - name: jayd-credentials
+    env: ./.env.secrets
+
+configMapGenerator:
+  - name: jayd-config
+    env: ./.env.config

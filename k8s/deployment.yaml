@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jayd-deployment
+spec:
+  selector:
+    matchLabels:
+      app: jayd
+  template:
+    metadata:
+      labels:
+        app: jayd
+    spec:
+      containers:
+        - name: jayd
+          image: public.ecr.aws/axatol/jayd
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: jayd-config
+            - secretRef:
+                name: jayd-credentials
