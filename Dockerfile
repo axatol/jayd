@@ -14,9 +14,9 @@ ENV VITE_AUTH0_CLIENT_ID=${AUTH0_CLIENT_ID}
 ENV VITE_API_URL=${API_URL}
 ENV VITE_API_AUDIENCE=${API_AUDIENCE}
 
-RUN npm run web:build
+RUN npm run build
 
-FROM golang:1.19 as build
+FROM golang:1.19 as server
 ENV CGO_ENABLED=0
 ENV GOOS=linux
 ENV GOARCH=amd64
@@ -42,6 +42,6 @@ RUN curl -L https://github.com/ytdl-patched/yt-dlp/releases/download/2023.02.17.
 WORKDIR /go/app
 RUN adduser --disabled-password --gecos "" --uid 1000 default
 USER default
-COPY --from=build --chown=default /bin/app /bin/app
+COPY --from=server --chown=default /bin/app /bin/app
 COPY --from=web --chown=default /app/web/dist /web
 ENTRYPOINT [ "/bin/app" ]
