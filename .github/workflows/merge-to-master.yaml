@@ -35,6 +35,10 @@ jobs:
         with:
           image: ${{ env.image }}
 
+      - uses: axatol/actions/prune-ecr-repository@release
+        with:
+          repository-name: ${{ env.image }}
+
   deploy:
     needs: build
     runs-on: self-hosted
