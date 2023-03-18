@@ -14,13 +14,12 @@ permissions:
 
 jobs:
   build:
-    name: Build
     runs-on: self-hosted
 
     steps:
       - uses: actions/checkout@v3
 
-      - uses: aws-actions/configure-aws-credentials@v1
+      - uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.AWS_ECR_IMAGE_PUBLISHER_ROLE_ARN }}
@@ -35,4 +34,11 @@ jobs:
       - uses: axatol/actions/docker-build-push@release
         with:
           image: ${{ env.image }}
-          use-cache: false
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    environment: deep-thought
+
+    steps:
+      - run: kubectl rollout restart --namespace jayd deployment/jayd-deployment
