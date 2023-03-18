@@ -1,11 +1,13 @@
 package downloader
 
-import "fmt"
+import (
+	"fmt"
+)
 
-func itemFilename(item QueueItem) string {
+func itemFilename(info InfoJSON) string {
 	var selectedFormat Format
-	for _, format := range item.Data.Formats {
-		if item.FormatID == format.FormatID {
+	for _, format := range info.Formats {
+		if info.FormatID == format.FormatID {
 			selectedFormat = format
 			break
 		}
@@ -16,5 +18,5 @@ func itemFilename(item QueueItem) string {
 		ext = selectedFormat.AudioExt
 	}
 
-	return fmt.Sprintf("%s_%s.%s", item.Data.ID, item.FormatID, ext)
+	return fmt.Sprintf("%s_%s.%s", info.VideoID, info.FormatID, ext)
 }

@@ -27,7 +27,7 @@ func middleware_ContentType(next http.Handler) http.Handler {
 func middleware_CORS(next http.Handler) http.Handler {
 	options := cors.Options{
 		AllowedOrigins:   strings.Split(config.ServerCORSList, ","),
-		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodOptions},
+		AllowedMethods:   []string{http.MethodOptions, http.MethodGet, http.MethodPost, http.MethodDelete},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: false,
 	}
@@ -36,11 +36,7 @@ func middleware_CORS(next http.Handler) http.Handler {
 }
 
 func middleware_JWT(next http.Handler) http.Handler {
-	if config.Auth0Audience == "" || config.Auth0Domain == "" {
-		log.Warn().
-			Str("auth0_audience", config.Auth0Audience).
-			Str("auth0_domain", config.Auth0Domain).
-			Msg("skipping JWT middleware configuration")
+	if !config.Auth0Enabled {
 		return next
 	}
 

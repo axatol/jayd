@@ -3,7 +3,6 @@ package config
 import (
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/rs/zerolog/log"
 )
@@ -25,31 +24,26 @@ func envValue(envKey string, fallback ...string) string {
 	return ""
 }
 
-func envValueInt(envKey string, fallback ...int) int {
-	fallbackValue := 0
-	if len(fallback) == 1 {
-		fallbackValue = fallback[0]
-	}
-
-	value := envValue(envKey, strconv.Itoa(fallbackValue))
+func envValueInt(envKey string, fallback int) int {
+	value := envValue(envKey, strconv.Itoa(fallback))
 	if value == "" {
-		return fallbackValue
+		return fallback
 	}
 
 	result, err := strconv.Atoi(value)
 	if err != nil {
 		log.Fatal().Str("key", envKey).Msg("failed to parse int type environment variable")
-		return fallbackValue
+		return fallback
 	}
 
 	return result
 }
 
-func envValueList(envKey string) []string {
-	value := envValue(envKey, "")
+func envValueBool(envKey string, fallback bool) bool {
+	value := envValue(envKey)
 	if value == "" {
-		return []string{}
+		return fallback
 	}
 
-	return strings.Split(value, ",")
+	return value == "true" || value == "1"
 }

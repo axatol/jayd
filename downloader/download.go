@@ -9,28 +9,23 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var (
-	History Queue
-)
+func Download(info InfoJSON) error {
+	id := info.VideoID + "#" + info.FormatID
 
-func Download(info InfoJSON, formatID string) error {
-	History.Add(info, formatID)
-	defer History.SetCompleted(info.ID, formatID)
+	Cache.Add(id, info)
+	defer Cache.SetCompleted(id)
 
 	log.Debug().
-		Str("video_id", info.ID).
-		Str("format_id", formatID).
+		Str("video_id", info.VideoID).
+		Str("format_id", info.FormatID).
 		Msg("downloading")
 
-	err := execYoutubeDownloader(info.ID, formatID)
+	err := execYoutubeDownloader(info.VideoID, info.FormatID)
 	if err != nil {
-		History.SetFailed(info.ID, formatID)
+		Cache.SetFailed(id)
+		return err
 	}
 
-	log.Debug().Err(err).
-		Str("video_id", info.ID).
-		Str("format_id", formatID).
-		Msg("downloaded")
 	return nil
 }
 

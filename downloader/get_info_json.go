@@ -21,7 +21,7 @@ type Format struct {
 }
 
 type InfoJSON struct {
-	ID             string   `json:"id"`
+	VideoID        string   `json:"id"`
 	Title          string   `json:"title"`
 	Formats        []Format `json:"formats"`
 	Thumbnail      string   `json:"thumbnail"`
@@ -30,6 +30,7 @@ type InfoJSON struct {
 	UploaderID     string   `json:"uploader_id"`
 	Duration       int      `json:"duration"`
 	DurationString string   `json:"duration_string"`
+	FormatID       string   `json:"format_id"`
 }
 
 var (

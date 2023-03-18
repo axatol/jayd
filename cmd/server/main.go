@@ -16,25 +16,25 @@ import (
 func main() {
 	log.Info().
 		Str("file", config.ServerBackupFile).
-		Msg("loading history from file")
+		Msg("loading cache from file")
 
-	if err := downloader.LoadHistory(config.ServerBackupFile); err != nil {
+	if err := downloader.CreateCache(config.ServerBackupFile); err != nil {
 		log.Error().
 			Err(err).
 			Str("file", config.ServerBackupFile).
-			Msg("could not load history from backup")
+			Msg("could not load cache from backup")
 	}
 
 	defer func() {
 		log.Info().
 			Str("file", config.ServerBackupFile).
-			Msg("saving history to file")
+			Msg("saving cache to file")
 
-		if err := downloader.History.Save(config.ServerBackupFile); err != nil {
+		if err := downloader.SaveCache(config.ServerBackupFile); err != nil {
 			log.Error().
 				Err(err).
 				Str("file", config.ServerBackupFile).
-				Msg("could not save history to backup")
+				Msg("could not save cache to backup")
 		}
 	}()
 

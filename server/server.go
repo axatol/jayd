@@ -31,12 +31,20 @@ func Init() *http.Server {
 		r.Delete("/queue", handler_DeleteDownloadQueueItem)
 	})
 
-	r.Route("/static", func(r chi.Router) {
+	r.Route("/ws", func(r chi.Router) {
+		r.Use(middleware_JWT)
+		r.Use(middleware_ContentType)
+		r.Get("/queue", handler_QueueEvents)
+	})
+
+	r.Route("/fs", func(r chi.Router) {
 		r.Use(middleware_JWT)
 		r.Get("/*", handler_StaticContent(config.DownloaderOutputDirectory))
 	})
 
-	r.Get("/*", handler_StaticContent(config.WebDirectory))
+	if config.WebDirectory != "" {
+		r.Get("/*", handler_StaticContent(config.WebDirectory))
+	}
 
 	return &http.Server{Addr: config.ServerAddress, Handler: r}
 }
