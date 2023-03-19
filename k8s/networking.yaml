@@ -18,15 +18,15 @@ metadata:
   #   kubernetes.io/ingress.class: traefik
 spec:
   # tls:
-  #   - secretName: api-jayd-k8s-axatol-xyz
+  #   - secretName: jayd-k8s-axatol-xyz
   #     hosts:
-  #       - api.jayd.k8s.axatol.xyz
+  #       - jayd.k8s.axatol.xyz
   rules:
-    - host: api.jayd.k8s.axatol.xyz
+    - host: jayd.k8s.axatol.xyz
       http:
         paths:
           - pathType: Prefix
-            path: "/"
+            path: /
             backend:
               service:
                 name: jayd-service

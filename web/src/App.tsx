@@ -5,29 +5,18 @@ import { QueueTable } from "./components/QueueTable";
 import { SearchForm } from "./components/SearchForm";
 import { YoutubeMetadataCard } from "./components/YoutubeMetadataCard";
 import { useAPI } from "./lib/api";
-import { QueueItem, YoutubeInfoJSON } from "./lib/types";
-
-let intervalFn: (() => void) | undefined = undefined;
-setInterval(() => {
-  intervalFn?.();
-}, 5000);
+import { YoutubeInfoJSON } from "./lib/types";
+import { useQueueEvents } from "./lib/useQueueEvents";
 
 export const App = () => {
   const api = useAPI();
   const [form] = Form.useForm<{ target: string }>();
   const [metadata, setMetadata] = useState<YoutubeInfoJSON>();
-  const [queue, setQueue] = useState<QueueItem[]>();
+  const queue = useQueueEvents();
 
   useEffect(() => {
-    refreshQueue();
-    intervalFn = refreshQueue;
-    return () => (intervalFn = undefined);
+    api.getQueue().then(queue.set);
   }, []);
-
-  const refreshQueue = async () => {
-    const queue = await api.getQueue();
-    setQueue(queue);
-  };
 
   const onReset = () => {
     form.resetFields();
@@ -37,13 +26,11 @@ export const App = () => {
   const onConfirm = async (videoId: string, formatId: string) => {
     onReset();
     await api.beginDownload(videoId, formatId);
-    await refreshQueue();
   };
 
   return (
     <Space direction="vertical" style={{ padding: 8, width: "100%" }}>
       <SearchForm form={form} onMetadata={setMetadata} />
-
       {metadata && (
         <YoutubeMetadataCard
           metadata={metadata}
@@ -51,8 +38,7 @@ export const App = () => {
           onReset={onReset}
         />
       )}
-
-      <QueueTable queue={queue} />
+      <QueueTable queue={queue.items} />
     </Space>
   );
 };

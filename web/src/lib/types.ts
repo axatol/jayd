@@ -25,6 +25,7 @@ export interface VideoFormat {
 
 export interface YoutubeInfoJSON {
   id: string;
+  format_id: string;
   title: string;
   formats: VideoFormat[];
   thumbnail: string;
@@ -35,13 +36,14 @@ export interface YoutubeInfoJSON {
   duration_string: string;
 }
 
-export interface QueueItemWithoutFormat {
-  is_completed: boolean;
-  is_failed: boolean;
-  selected_format_id: string;
+export interface QueueItem {
+  id: string;
+  completed: boolean;
+  failed: boolean;
   data: YoutubeInfoJSON;
 }
 
-export interface QueueItem extends QueueItemWithoutFormat {
-  format?: VideoFormat;
+export interface QueueEvent {
+  action: "added" | "completed" | "failed" | "removed";
+  item: QueueItem;
 }

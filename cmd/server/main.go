@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/axatol/jayd/config"
@@ -63,6 +64,7 @@ func main() {
 
 func waitForInterrupt() {
 	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt)
-	<-interrupt
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGINT)
+	signal := <-interrupt
+	log.Info().Str("signal", signal.String()).Msg("caught interupt")
 }

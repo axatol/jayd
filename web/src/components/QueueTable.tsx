@@ -1,5 +1,5 @@
 import { DeleteOutlined, WarningOutlined } from "@ant-design/icons";
-import { Table, Image, Card, Tag, Tooltip, Space, Button } from "antd";
+import { Table, Image, Card, Tag, Space, Button } from "antd";
 
 import { DownloadButton } from "./DownloadButton";
 import { YoutubeChannelLink, YoutubeVideoLink } from "./Links";
@@ -9,7 +9,7 @@ import { QueueItem, VideoFormat } from "../lib/types";
 export const QueueTable = (props: { queue?: QueueItem[] }) => (
   <Card hoverable style={{ cursor: "auto" }} bodyStyle={{ padding: 0 }}>
     <Table
-      rowKey={(item) => item.data.id + item.selected_format_id}
+      rowKey={(item) => item.id}
       dataSource={props.queue}
       columns={[
         {
@@ -65,35 +65,33 @@ export const QueueTable = (props: { queue?: QueueItem[] }) => (
 );
 
 const Actions = (props: { item: QueueItem }) => {
-  const { is_completed, is_failed, format, data } = props.item;
+  const { completed, failed, data } = props.item;
+  const { format_id, formats } = data;
+  const format = formats.find((format) => format.format_id == format_id);
   const api = useAPI();
 
-  if (is_failed || !format) {
-    return (
-      <Tooltip title="An error occurred">
-        <Tag color="error" icon={<WarningOutlined color="danger" />}>
-          Failed
-        </Tag>
-      </Tooltip>
-    );
-  }
-
-  const { audio_ext, video_ext, format_id } = format;
-  const ext = video_ext === "none" ? audio_ext : video_ext;
+  const ext =
+    format?.video_ext === "none" ? format?.audio_ext : format?.video_ext;
   const filename = `${data.id}_${format_id}.${ext}`;
 
   return (
     <Space>
-      <DownloadButton
-        loading={!is_completed ? true : undefined}
-        href={filename}
-      />
+      {!failed && format ? (
+        <DownloadButton
+          loading={!completed ? true : undefined}
+          href={filename}
+        />
+      ) : (
+        <Tag color="error" icon={<WarningOutlined color="danger" />}>
+          Failed
+        </Tag>
+      )}
 
       <Button
         danger
         icon={<DeleteOutlined />}
         shape="circle"
-        onClick={() => api.deleteQueueItem(data.id, format.format_id)}
+        onClick={() => api.deleteQueueItem(data.id, format_id)}
       />
     </Space>
   );
