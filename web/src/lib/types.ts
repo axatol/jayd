@@ -34,6 +34,8 @@ export interface YoutubeInfoJSON {
   uploader_id: string;
   duration: number;
   duration_string: string;
+  ext: string;
+  filename: string;
 }
 
 export interface QueueItem {

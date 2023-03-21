@@ -50,9 +50,9 @@ export const useAPI = () => {
       })
       .then((result) => result.data.data);
 
-  const beginDownload = (target: string, format: string) =>
+  const beginDownload = (target: string, format: string, overwrite?: boolean) =>
     api
-      .post("/api/youtube", null, { params: { target, format } })
+      .post("/api/youtube", null, { params: { target, format, overwrite } })
       .then((result) => result.data);
 
   const getQueueItem = (target: string, format?: string) =>
@@ -72,7 +72,7 @@ export const useAPI = () => {
       .get<APIResponse<QueueItem[]>>("/api/queue")
       .then((result) => result.data);
 
-  const staticFile = (file: string) => api.get(`/static/${file}`);
+  const staticFile = (file: string) => api.get(`/api/content/${file}`);
 
   return {
     api,

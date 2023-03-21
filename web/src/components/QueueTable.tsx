@@ -1,6 +1,11 @@
-import { DeleteOutlined, WarningOutlined } from "@ant-design/icons";
-import { Table, Image, Card, Tag, Space, Button } from "antd";
+import {
+  DeleteOutlined,
+  ReloadOutlined,
+  WarningOutlined,
+} from "@ant-design/icons";
+import { Table, Image, Card, Tag, Space, Button, Tooltip } from "antd";
 
+import { AsyncButton } from "./AsyncButton";
 import { DownloadButton } from "./DownloadButton";
 import { YoutubeChannelLink, YoutubeVideoLink } from "./Links";
 import { useAPI } from "../lib/api";
@@ -78,15 +83,36 @@ export const QueueTable = (props: { queue?: QueueItem[] }) => (
 
 const Actions = (props: { item: QueueItem }) => {
   const { completed, failed, data } = props.item;
-  const { format_id, filename } = data;
+  const { id, format_id, filename } = data;
   const api = useAPI();
+
+  const retry = async () => {
+    await api.beginDownload(
+      `https://youtube.com/watch?v=${id}`,
+      format_id,
+      true,
+    );
+  };
 
   return (
     <Space>
       {failed ? (
-        <Tag color="error" icon={<WarningOutlined color="danger" />}>
-          Failed
-        </Tag>
+        <>
+          <Tag
+            color="error"
+            icon={<WarningOutlined color="danger" />}
+            style={{ margin: 0 }}
+          >
+            Failed
+          </Tag>
+
+          <AsyncButton
+            tooltip="Retry"
+            shape="circle"
+            icon={<ReloadOutlined />}
+            onClick={retry}
+          />
+        </>
       ) : (
         <DownloadButton
           loading={!completed ? true : undefined}

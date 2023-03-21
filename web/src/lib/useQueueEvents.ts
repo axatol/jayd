@@ -16,15 +16,24 @@ const reducer = (
 
   switch (event.action) {
     case "added":
+      if (queue.find((item) => item.id === event.item.id)) {
+        return queue.map((item) =>
+          item.id === event.item.id ? event.item : item,
+        );
+      }
+
       return [...queue, event.item];
+
     case "completed":
       return queue.map((item) =>
         item.id === event.item.id ? { ...item, completed: true } : item,
       );
+
     case "failed":
       return queue.map((item) =>
         item.id === event.item.id ? { ...item, failed: true } : item,
       );
+
     case "removed":
       return queue.filter((item) => item.id !== event.item.id);
 
@@ -40,6 +49,8 @@ export const useQueueEvents = () => {
     onError: (e) => console.error(e),
     shouldReconnect: () => mounted.current,
   });
+
+  // TODO ping
 
   useEffect(() => {
     console.log("useEffect", lastJsonMessage);
