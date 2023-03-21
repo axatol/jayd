@@ -7,7 +7,6 @@ resources:
   - ./namespace.yaml
   - ./deployment.yaml
   - ./networking.yaml
-  - ./storage.yaml
 
 secretGenerator:
   - name: jayd-credentials
