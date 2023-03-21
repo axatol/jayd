@@ -21,14 +21,16 @@ func CacheItemID(videoID string, formatID string) string {
 	return fmt.Sprintf("%s#%s", videoID, formatID)
 }
 
-func Download(info InfoJSON, formatID string) error {
+func Download(info InfoJSON, formatID string, overwrite bool) error {
 	id := CacheItemID(info.VideoID, formatID)
 	info.FormatID = formatID
 	info.Formats = selectItemFormats(formatID, info.Formats)
 	info.Ext = selectItemExt(info.Formats)
 	info.Filename = renderItemFilename(info)
 	formatType := selectFormatType(info.Formats)
+
 	if info.Ext == "" {
+		Cache.SetFailed(id)
 		return fmt.Errorf("could not determine format extension")
 	}
 
@@ -36,13 +38,18 @@ func Download(info InfoJSON, formatID string) error {
 		Str("ext", info.Ext).
 		Str("filename", info.Filename).
 		Str("format_type", string(formatType)).
+		Bool("overwrite", overwrite).
 		Msg("downloading")
 
-	Cache.Add(id, info)
+	if overwrite {
+		Cache.Set(id, info)
+	} else {
+		Cache.Add(id, info)
+	}
+
 	defer Cache.SetCompleted(id)
 
-	err := executeYTDL(info.VideoID, formatID, formatType)
-	if err != nil {
+	if err := executeYTDL(info.VideoID, formatID, formatType); err != nil {
 		Cache.SetFailed(id)
 		return err
 	}

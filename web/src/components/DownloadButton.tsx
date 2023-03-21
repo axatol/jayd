@@ -10,7 +10,7 @@ const downloadFile = async (
   href: string,
   setProgress: (progress?: number) => void,
 ) => {
-  const response = await api.get(`/static/${href}`, {
+  const response = await api.get(`/api/content/${href}`, {
     responseType: "blob",
     onDownloadProgress: (event) => {
       console.log("setProgress", event.progress);
@@ -52,12 +52,12 @@ export const DownloadButton = ({
 
   return (
     <Button
-      {...props}
       loading={props.loading ?? loading}
-      onClick={download}
       type="primary"
       shape="round"
       icon={<DownloadOutlined />}
+      {...props}
+      onClick={download}
       download
     >
       {children ?? "Download"}

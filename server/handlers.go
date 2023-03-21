@@ -57,6 +57,8 @@ func handler_QueueVideoDownload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	overwrite := r.URL.Query().Get("overwrite") == "true"
+
 	unescaped, err := url.QueryUnescape(target)
 	if err != nil {
 		log.Error().Str("target", target).Err(err).Msg("failed to unescape target")
@@ -86,8 +88,8 @@ func handler_QueueVideoDownload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
-		if err := downloader.Download(*info, format); err != nil {
-			log.Error().Err(err).Str("target", info.VideoID).Msg("failed to download")
+		if err := downloader.Download(*info, format, overwrite); err != nil {
+			log.Error().Err(err).Str("target", info.VideoID).Str("format", info.FormatID).Msg("failed to download")
 		}
 	}()
 

@@ -45,14 +45,26 @@ export const QueueTable = (props: { queue?: QueueItem[] }) => (
         {
           key: "format",
           title: "Format",
-          dataIndex: ["format"],
-          render: (format) => <Format format={format} />,
+          dataIndex: ["data", "formats"],
+          render: (_, { data }) => (
+            <Space direction="vertical">
+              {data.formats.map((format) => (
+                <Format key={format.format_id} format={format} />
+              ))}
+            </Space>
+          ),
         },
         {
           key: "filesize",
           title: "Filesize",
-          dataIndex: ["format", "filesize"],
-          render: (value) => `${(value / 1000000).toFixed(2)} MB`,
+          render: (_, { data }) => {
+            const total = data.formats.reduce(
+              (total, { filesize }) => total + filesize,
+              0,
+            );
+
+            return `${(total / 1000000).toFixed(2)} MB`;
+          },
         },
         {
           key: "actions",
@@ -66,25 +78,20 @@ export const QueueTable = (props: { queue?: QueueItem[] }) => (
 
 const Actions = (props: { item: QueueItem }) => {
   const { completed, failed, data } = props.item;
-  const { format_id, formats } = data;
-  const format = formats.find((format) => format.format_id == format_id);
+  const { format_id, filename } = data;
   const api = useAPI();
-
-  const ext =
-    format?.video_ext === "none" ? format?.audio_ext : format?.video_ext;
-  const filename = `${data.id}_${format_id}.${ext}`;
 
   return (
     <Space>
-      {!failed && format ? (
+      {failed ? (
+        <Tag color="error" icon={<WarningOutlined color="danger" />}>
+          Failed
+        </Tag>
+      ) : (
         <DownloadButton
           loading={!completed ? true : undefined}
           href={filename}
         />
-      ) : (
-        <Tag color="error" icon={<WarningOutlined color="danger" />}>
-          Failed
-        </Tag>
       )}
 
       <Button
