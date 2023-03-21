@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 
+	fp "github.com/axatol/go-utils/functional"
 	"github.com/axatol/jayd/downloader"
 	"github.com/axatol/jayd/youtube"
 	"github.com/go-chi/chi/v5"
@@ -77,22 +78,15 @@ func handler_QueueVideoDownload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exists := false
-	for _, cached := range info.Formats {
-		if cached.FormatID == format {
-			exists = true
-			break
-		}
-	}
-
-	if format != downloader.FormatDefaultAudio && format != downloader.FormatDefaultVideo && !exists {
+	matching := fp.Filter(info.Formats, func(e downloader.Format, i int) bool { return e.FormatID == format })
+	if len(matching) < 1 {
 		log.Error().Err(err).Str("target", info.VideoID).Str("format", format).Msg("invalid format")
 		responseErr(w, err_InvalidFormat, http.StatusBadRequest)
 		return
 	}
 
 	go func() {
-		if err := downloader.Download(*info); err != nil {
+		if err := downloader.Download(*info, format); err != nil {
 			log.Error().Err(err).Str("target", info.VideoID).Msg("failed to download")
 		}
 	}()
@@ -122,16 +116,23 @@ func handler_ListDownloadQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	items := downloader.Cache.Get(metadata.VideoID + r.URL.Query().Get("format"))
+	format := r.URL.Query().Get("format")
+	if format == "" {
+		responseErr(w, err_MissingFormat, http.StatusBadRequest)
+		return
+	}
+
+	id := downloader.CacheItemID(metadata.VideoID, format)
+	items := downloader.Cache.Get(id)
 	if items == nil {
 		responseErr(w, err_NotFound, http.StatusNotFound)
 		return
 	}
 
-	responseOk(w, items)
+	responseOk(w, downloader.Cache)
 }
 
-func handler_DeleteDownloadQueueItem(w http.ResponseWriter, r *http.Request) {
+func handler_DeleteQueueItem(w http.ResponseWriter, r *http.Request) {
 	target := r.URL.Query().Get("target")
 	if target == "" {
 		responseErr(w, err_MissingTarget, http.StatusBadRequest)
@@ -158,7 +159,8 @@ func handler_DeleteDownloadQueueItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	downloader.Cache.Remove(metadata.VideoID + format)
+	id := downloader.CacheItemID(metadata.VideoID, format)
+	downloader.Cache.Remove(id)
 	responseOk[any](w, nil)
 }
 

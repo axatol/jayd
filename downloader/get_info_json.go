@@ -31,6 +31,8 @@ type InfoJSON struct {
 	Duration       int      `json:"duration"`
 	DurationString string   `json:"duration_string"`
 	FormatID       string   `json:"format_id"`
+	Ext            string   `json:"ext"`
+	Filename       string   `json:"filename"`
 }
 
 var (

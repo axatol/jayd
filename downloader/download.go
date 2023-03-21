@@ -4,23 +4,44 @@ import (
 	"fmt"
 	"os/exec"
 	"strconv"
+	"strings"
 
 	"github.com/axatol/jayd/config"
 	"github.com/rs/zerolog/log"
 )
 
-func Download(info InfoJSON) error {
-	id := info.VideoID + "#" + info.FormatID
+type FormatType string
+
+const (
+	AudioVideoFormatType FormatType = "audio_video"
+	AudioOnlyFormatType  FormatType = "audio_only"
+)
+
+func CacheItemID(videoID string, formatID string) string {
+	return fmt.Sprintf("%s#%s", videoID, formatID)
+}
+
+func Download(info InfoJSON, formatID string) error {
+	id := CacheItemID(info.VideoID, formatID)
+	info.FormatID = formatID
+	info.Formats = selectItemFormats(formatID, info.Formats)
+	info.Ext = selectItemExt(info.Formats)
+	info.Filename = renderItemFilename(info)
+	formatType := selectFormatType(info.Formats)
+	if info.Ext == "" {
+		return fmt.Errorf("could not determine format extension")
+	}
+
+	log.Debug().
+		Str("ext", info.Ext).
+		Str("filename", info.Filename).
+		Str("format_type", string(formatType)).
+		Msg("downloading")
 
 	Cache.Add(id, info)
 	defer Cache.SetCompleted(id)
 
-	log.Debug().
-		Str("video_id", info.VideoID).
-		Str("format_id", info.FormatID).
-		Msg("downloading")
-
-	err := execYoutubeDownloader(info.VideoID, info.FormatID)
+	err := executeYTDL(info.VideoID, formatID, formatType)
 	if err != nil {
 		Cache.SetFailed(id)
 		return err
@@ -28,11 +49,6 @@ func Download(info InfoJSON) error {
 
 	return nil
 }
-
-const (
-	FormatDefaultVideo = "defaultvideo"
-	FormatDefaultAudio = "defaultaudio"
-)
 
 var (
 	ytdlpExecArguments = []string{
@@ -78,29 +94,36 @@ var (
 		"--no-keep-video",
 
 		// video format options
-		"--format-sort",
-		"hasaud,quality,abr,asr,+size",
+		// "--format-sort",
+		// "hasaud,quality,abr,asr,+size",
 	}
 
 	ytdlpExecVideoArguments = []string{
+		// post-processing options
+		// TODO
+
 		// video format options
-		"--format-sort",
-		"hasvid,lang,quality,res:1080,+size",
+		// "--format-sort",
+		// "hasvid,lang,quality,res:1080,+size",
 	}
 )
 
-func execYoutubeDownloader(videoID string, formatID string) error {
+func executeYTDL(videoID string, formatID string, formatType FormatType) error {
 	target := fmt.Sprintf("https://youtube.com/watch?v=%s", videoID)
 	outputTemplate := fmt.Sprintf("%s_%s.%s", "%(id)s", formatID, "%(ext)s")
-	args := []string{target, "--output", outputTemplate}
-	args = append(args, ytdlpExecArguments...)
-	switch formatID {
-	case FormatDefaultAudio:
+
+	args := append(
+		ytdlpExecArguments,
+		target,
+		"--output", outputTemplate,
+		"--format", formatID,
+	)
+
+	switch formatType {
+	case AudioVideoFormatType:
 		args = append(args, ytdlpExecAudioArguments...)
-	case FormatDefaultVideo:
+	case AudioOnlyFormatType:
 		args = append(args, ytdlpExecVideoArguments...)
-	default:
-		args = append(args, "--format", formatID)
 	}
 
 	cmd := exec.Command(config.DownloaderExecutable, args...)
@@ -114,4 +137,47 @@ func execYoutubeDownloader(videoID string, formatID string) error {
 	}
 
 	return nil
+}
+
+func selectFormatType(formats []Format) FormatType {
+	for _, format := range formats {
+		if format.VideoExt != "none" {
+			return AudioVideoFormatType
+		}
+	}
+
+	return AudioOnlyFormatType
+}
+
+func selectItemFormats(id string, formats []Format) []Format {
+	ids := strings.Split(id, "+")
+	results := []Format{}
+
+	for _, format := range formats {
+		for _, id := range ids {
+			if id == format.FormatID {
+				results = append(results, format)
+			}
+		}
+	}
+
+	return results
+}
+
+func selectItemExt(formats []Format) string {
+	for _, format := range formats {
+		if format.VideoExt != "none" {
+			return format.VideoExt
+		}
+
+		if format.AudioExt != "none" {
+			return format.AudioExt
+		}
+	}
+
+	return ""
+}
+
+func renderItemFilename(info InfoJSON) string {
+	return fmt.Sprintf("%s_%s.%s", info.VideoID, info.FormatID, info.Ext)
 }

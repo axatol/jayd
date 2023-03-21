@@ -33,7 +33,7 @@ func createCache(initial ...map[string]ds.AsyncMapItem[InfoJSON]) {
 				continue
 			}
 
-			filename := itemFilename(event.Item.Data)
+			filename := renderItemFilename(event.Item.Data)
 			if err := os.Remove(filename); err != nil {
 				log.Error().
 					Err(err).
@@ -48,12 +48,12 @@ func createCache(initial ...map[string]ds.AsyncMapItem[InfoJSON]) {
 	}()
 }
 
-func CreateCache(name string) error {
-	raw, err := os.ReadFile(name)
+func CreateCache(filename string) error {
+	raw, err := os.ReadFile(filename)
 	if err != nil {
 		log.Error().
 			Err(err).
-			Str("name", name).
+			Str("filename", filename).
 			Msg("error reading cache file")
 		createCache()
 		return nil

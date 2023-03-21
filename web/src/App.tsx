@@ -15,7 +15,7 @@ export const App = () => {
   const queue = useQueueEvents();
 
   useEffect(() => {
-    api.getQueue().then(queue.set);
+    api.getQueue().then((response) => queue.set(response.data));
   }, []);
 
   const onReset = () => {

@@ -2,12 +2,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import axios, { AxiosError } from "axios";
 import { useEffect } from "react";
 
-import {
-  APIResponse,
-  QueueItem,
-  QueueItemWithoutFormat,
-  YoutubeInfoJSON,
-} from "./types";
+import { APIResponse, QueueItem, YoutubeInfoJSON } from "./types";
 import { config } from "../config";
 
 const api = axios.create({ baseURL: config.api.baseUrl });
@@ -62,10 +57,10 @@ export const useAPI = () => {
 
   const getQueueItem = (target: string, format?: string) =>
     api
-      .get<APIResponse<QueueItemWithoutFormat[]>>("/api/queue", {
+      .get<APIResponse<QueueItem[]>>("/api/queue", {
         params: { target, format },
       })
-      .then((result) => result.data.data.map(mapItemFormat));
+      .then((result) => result.data);
 
   const deleteQueueItem = (target: string, format: string) =>
     api
@@ -74,8 +69,8 @@ export const useAPI = () => {
 
   const getQueue = () =>
     api
-      .get<APIResponse<QueueItemWithoutFormat[]>>("/api/queue")
-      .then((result) => result.data.data.map(mapItemFormat));
+      .get<APIResponse<QueueItem[]>>("/api/queue")
+      .then((result) => result.data);
 
   const staticFile = (file: string) => api.get(`/static/${file}`);
 
@@ -88,12 +83,4 @@ export const useAPI = () => {
     deleteQueueItem,
     staticFile,
   };
-};
-
-const mapItemFormat = (item: QueueItemWithoutFormat): QueueItem => {
-  const selected = item.data.formats.find(
-    (format) => format.format_id === item.selected_format_id,
-  );
-
-  return { ...item, format: selected };
 };

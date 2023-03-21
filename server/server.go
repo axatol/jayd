@@ -28,18 +28,18 @@ func Init() *http.Server {
 		r.Get("/youtube/metadata", handler_GetVideoMetadata)
 		r.Post("/youtube", handler_QueueVideoDownload)
 		r.Get("/queue", handler_ListDownloadQueue)
-		r.Delete("/queue", handler_DeleteDownloadQueueItem)
+		r.Delete("/queue", handler_DeleteQueueItem)
+
+		r.Route("/content", func(r chi.Router) {
+			r.Use(middleware_JWT)
+			r.Get("/*", handler_StaticContent(config.DownloaderOutputDirectory))
+		})
 	})
 
 	r.Route("/ws", func(r chi.Router) {
 		r.Use(middleware_JWT)
 		r.Use(middleware_ContentType)
 		r.Get("/queue", handler_QueueEvents)
-	})
-
-	r.Route("/fs", func(r chi.Router) {
-		r.Use(middleware_JWT)
-		r.Get("/*", handler_StaticContent(config.DownloaderOutputDirectory))
 	})
 
 	if config.WebDirectory != "" {
