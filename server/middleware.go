@@ -12,8 +12,10 @@ import (
 	"github.com/auth0/go-jwt-middleware/v2/jwks"
 	"github.com/auth0/go-jwt-middleware/v2/validator"
 	"github.com/axatol/jayd/config"
+	"github.com/axatol/jayd/config/nr"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/rs/zerolog/log"
 )
 
@@ -68,6 +70,24 @@ func middleware_JWT(next http.Handler) http.Handler {
 	)
 
 	return middleware.CheckJWT(next)
+}
+
+func middleware_NewRelic(next http.Handler) http.Handler {
+	if !nr.Enabled {
+		return next
+	}
+
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		route, ok := getRoutePattern(r)
+		if !ok {
+			route = r.RequestURI
+		}
+
+		_, handler := newrelic.WrapHandleFunc(nr.App, route, next.ServeHTTP)
+		handler(w, r)
+	}
+
+	return http.HandlerFunc(fn)
 }
 
 func middleware_Logger(next http.Handler) http.Handler {

@@ -6,17 +6,28 @@ import (
 	"time"
 
 	"github.com/axatol/jayd/config"
+	"github.com/axatol/jayd/config/nr"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/tags"
 	"github.com/rs/zerolog/log"
 )
 
-type Client struct {
+type MinioClient struct {
 	client *minio.Client
 }
 
-func NewClient(ctx context.Context) (*Client, error) {
+type Tags map[string]string
+
+var (
+	c *MinioClient
+)
+
+func AssertClient(ctx context.Context) (*MinioClient, error) {
+	if c != nil {
+		return c, nil
+	}
+
 	creds := credentials.NewStaticV4(
 		config.StorageAccessKeyID,
 		config.StorageSecretAccessKey,
@@ -39,10 +50,14 @@ func NewClient(ctx context.Context) (*Client, error) {
 		}
 	}
 
-	return &Client{client}, nil
+	c = &MinioClient{client}
+	return c, nil
 }
 
-func (c *Client) FPut(ctx context.Context, objectName string, filePath string, tags map[string]string) error {
+func (c *MinioClient) FPutObject(ctx context.Context, objectName string, filePath string, tags Tags) error {
+	segment := nr.Segment(ctx, "miniodriver.FPutObject", nr.Attrs{"object_name": objectName})
+	defer segment.End()
+
 	res, err := c.client.FPutObject(
 		ctx,
 		config.StorageBucketName,
@@ -59,12 +74,37 @@ func (c *Client) FPut(ctx context.Context, objectName string, filePath string, t
 		Str("object_name", objectName).
 		Str("file_path", filePath).
 		Str("version_id", res.VersionID).
-		Msg("put object")
+		Msg("put file")
+
+	segment.AddAttribute("version_id", res.VersionID)
 
 	return nil
 }
 
-func (c *Client) GetPresignedURL(ctx context.Context, objectName string) (*url.URL, error) {
+func (c *MinioClient) RemoveObject(ctx context.Context, objectName string) error {
+	defer nr.Segment(ctx, "miniodriver.RemoveObject", nr.Attrs{"object_name": objectName}).End()
+
+	err := c.client.RemoveObject(
+		ctx,
+		config.StorageBucketName,
+		objectName,
+		minio.RemoveObjectOptions{},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	log.Info().
+		Str("object_name", objectName).
+		Msg("removed object")
+
+	return nil
+}
+
+func (c *MinioClient) GetPresignedURL(ctx context.Context, objectName string) (*url.URL, error) {
+	defer nr.Segment(ctx, "miniodriver.GetPresignedURL", nr.Attrs{"object_name": objectName}).End()
+
 	presigned, err := c.client.PresignedGetObject(
 		ctx,
 		config.StorageBucketName,
@@ -84,7 +124,10 @@ func (c *Client) GetPresignedURL(ctx context.Context, objectName string) (*url.U
 	return presigned, nil
 }
 
-func (c *Client) List(ctx context.Context, prefix string) ([]minio.ObjectInfo, error) {
+func (c *MinioClient) List(ctx context.Context, prefix string) ([]minio.ObjectInfo, error) {
+	segment := nr.Segment(ctx, "miniodriver.List", nr.Attrs{"prefix": prefix})
+	defer segment.End()
+
 	objects := c.client.ListObjects(
 		ctx,
 		config.StorageBucketName,
@@ -102,13 +145,17 @@ func (c *Client) List(ctx context.Context, prefix string) ([]minio.ObjectInfo, e
 
 	log.Info().
 		Str("prefix", prefix).
-		Int("count", len(results)).
+		Int("object_count", len(results)).
 		Msg("listed objects")
+
+	segment.AddAttribute("object_count", len(results))
 
 	return results, nil
 }
 
-func (c *Client) GetTags(ctx context.Context, objectName string) (map[string]string, error) {
+func (c *MinioClient) GetTags(ctx context.Context, objectName string) (Tags, error) {
+	defer nr.Segment(ctx, "miniodriver.GetTags", nr.Attrs{"object_name": objectName}).End()
+
 	tags, err := c.client.GetObjectTagging(
 		ctx,
 		config.StorageBucketName,
@@ -119,7 +166,9 @@ func (c *Client) GetTags(ctx context.Context, objectName string) (map[string]str
 	return tags.ToMap(), err
 }
 
-func (c *Client) PutTags(ctx context.Context, objectName string, newTags map[string]string) error {
+func (c *MinioClient) PutTags(ctx context.Context, objectName string, newTags Tags) error {
+	defer nr.Segment(ctx, "miniodriver.PutTags", nr.Attrs{"object_name": objectName}).End()
+
 	objectTags, err := tags.MapToObjectTags(newTags)
 	if err != nil {
 		return err

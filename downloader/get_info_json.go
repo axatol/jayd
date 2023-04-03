@@ -7,6 +7,7 @@ import (
 	"os/exec"
 
 	"github.com/axatol/jayd/config"
+	"github.com/axatol/jayd/config/nr"
 	"github.com/rs/zerolog/log"
 )
 
@@ -40,6 +41,8 @@ var (
 )
 
 func GetInfoJSON(ctx context.Context, videoID string) (*InfoJSON, error) {
+	defer nr.Segment(ctx, "downloader.GetInfoJSON", nr.Attrs{"video_id": videoID}).End()
+
 	if value, ok := infoCache[videoID]; ok {
 		log.Debug().Str("video_id", videoID).Msg("retrieved info json from cache")
 		return &value, nil

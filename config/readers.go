@@ -13,10 +13,6 @@ func envValue(envKey string, fallback ...string) string {
 		return value
 	}
 
-	if value, ok := envFile[envKey]; ok {
-		return value
-	}
-
 	if len(fallback) == 1 {
 		return fallback[0]
 	}

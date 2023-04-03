@@ -21,6 +21,7 @@ func Init() *http.Server {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(time.Second * 30))
 	r.Use(middleware.Compress(5))
+	r.Use(middleware_NewRelic)
 
 	r.Route("/api", func(r chi.Router) {
 		r.Use(middleware_JWT)
@@ -32,7 +33,11 @@ func Init() *http.Server {
 
 		r.Route("/content", func(r chi.Router) {
 			r.Use(middleware_JWT)
-			r.Get("/*", handler_StaticContent(config.DownloaderOutputDirectory))
+			if config.StorageEnabled {
+				r.Get("/{key}", handler_PresignedContent)
+			} else {
+				r.Get("/*", handler_StaticContent(config.DownloaderOutputDirectory))
+			}
 		})
 	})
 

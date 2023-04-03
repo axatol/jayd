@@ -3,17 +3,20 @@ package config
 import (
 	"flag"
 	"os"
+	"strings"
 
+	"github.com/axatol/jayd/config/nr"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
 var (
-	envFile, _ = godotenv.Read()
-	Debug      = envValueBool("DEBUG", false)
+	_ = godotenv.Load()
 
-	Auth0Enabled  = envValueBool("AUTH0_ENABLED", true)
+	Debug = envValueBool("DEBUG", false)
+
+	Auth0Enabled  = envValueBool("AUTH0_ENABLED", false)
 	Auth0Domain   = envValue("AUTH0_DOMAIN", "")
 	Auth0Audience = envValue("AUTH0_AUDIENCE", "")
 
@@ -27,7 +30,7 @@ var (
 	ServerAddress    = envValue("SERVER_ADDRESS", ":8000")
 	ServerCORSList   = envValue("SERVER_CORS_LIST", "")
 
-	StorageEnabled         = envValueBool("STORAGE_ENABLED", true)
+	StorageEnabled         = envValueBool("STORAGE_ENABLED", false)
 	StorageEndpoint        = envValue("STORAGE_ENDPOINT", "")
 	StorageBucketName      = envValue("STORAGE_BUCKET_NAME", "jayd")
 	StorageAccessKeyID     = envValue("STORAGE_ACCESS_KEY_ID", "")
@@ -79,10 +82,41 @@ func init() {
 			Msg("must provide auth0 domain and audience")
 	}
 
+	nr.Configure()
+
 	if StorageEnabled && (StorageEndpoint == "" || StorageAccessKeyID == "" || StorageSecretAccessKey == "") {
 		log.Fatal().
 			Str("storage_endpoint", StorageEndpoint).
 			Msg("must provide storage endpoint and credentials")
 	}
+}
 
+func obscure(input string, visiblePrefix int) string {
+	visible := input[0:visiblePrefix]
+	obscured := strings.Repeat("*", len(input)-visiblePrefix)
+	return visible + obscured
+}
+
+func Print() {
+	log.Debug().
+		Bool("Debug", Debug).
+		Bool("Auth0Enabled", Auth0Enabled).
+		Str("Auth0Domain", Auth0Domain).
+		Str("Auth0Audience", Auth0Audience).
+		Str("DownloaderExecutable", DownloaderExecutable).
+		Str("DownloaderOutputDirectory", DownloaderOutputDirectory).
+		Str("DownloaderCacheDirectory", DownloaderCacheDirectory).
+		Int("DownloaderRetries", DownloaderRetries).
+		Int("DownloaderConcurrency", DownloaderConcurrency).
+		Str("ServerBackupFile", ServerBackupFile).
+		Str("ServerAddress", ServerAddress).
+		Str("ServerCORSList", ServerCORSList).
+		Bool("StorageEnabled", StorageEnabled).
+		Str("StorageEndpoint", StorageEndpoint).
+		Str("StorageBucketName", StorageBucketName).
+		Str("StorageAccessKeyID", obscure(StorageAccessKeyID, 3)).
+		Str("StorageSecretAccessKey", obscure(StorageSecretAccessKey, 3)).
+		Str("WebDirectory", WebDirectory).
+		Str("YoutubeAPIKey", obscure(YoutubeAPIKey, 3)).
+		Send()
 }

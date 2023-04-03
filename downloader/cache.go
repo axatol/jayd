@@ -6,6 +6,7 @@ import (
 	"path"
 
 	ds "github.com/axatol/go-utils/datastructures"
+	"github.com/axatol/jayd/config"
 	"github.com/rs/zerolog/log"
 )
 
@@ -29,15 +30,15 @@ func createCache(initial ...map[string]ds.AsyncMapItem[InfoJSON]) {
 				Str("video_id", event.Item.Data.VideoID).
 				Msg("cache event")
 
-			if event.Action != ds.RemovedEventAction {
+			if event.Action != ds.RemovedEventAction && event.Action != ds.FailedEventAction {
 				continue
 			}
 
-			filename := renderItemFilename(event.Item.Data)
-			if err := os.Remove(filename); err != nil {
+			filepath := path.Join(config.DownloaderOutputDirectory, event.Item.Data.Filename)
+			if err := os.Remove(filepath); err != nil && os.IsNotExist(err) {
 				log.Error().
 					Err(err).
-					Str("filename", filename).
+					Str("filepath", filepath).
 					Str("video_id", event.Item.Data.VideoID).
 					Str("format_id", event.Item.Data.FormatID).
 					Msg("failed to delete file")

@@ -1,12 +1,16 @@
 package downloader
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
+	"path"
 	"strconv"
 	"strings"
 
 	"github.com/axatol/jayd/config"
+	"github.com/axatol/jayd/config/nr"
+	"github.com/axatol/jayd/downloader/miniodriver"
 	"github.com/rs/zerolog/log"
 )
 
@@ -21,7 +25,12 @@ func CacheItemID(videoID string, formatID string) string {
 	return fmt.Sprintf("%s#%s", videoID, formatID)
 }
 
-func Download(info InfoJSON, formatID string, overwrite bool) error {
+func Download(ctx context.Context, info InfoJSON, formatID string, overwrite bool) error {
+	defer nr.Segment(ctx, "downloader.Download", nr.Attrs{
+		"video_id":  info.VideoID,
+		"format_id": formatID,
+	}).End()
+
 	id := CacheItemID(info.VideoID, formatID)
 	info.FormatID = formatID
 	info.Formats = selectItemFormats(formatID, info.Formats)
@@ -52,6 +61,20 @@ func Download(info InfoJSON, formatID string, overwrite bool) error {
 	if err := executeYTDL(info.VideoID, formatID, formatType); err != nil {
 		Cache.SetFailed(id)
 		return err
+	}
+
+	if config.StorageEnabled {
+		client, err := miniodriver.AssertClient(ctx)
+		if err != nil {
+			Cache.SetFailed(id)
+			return err
+		}
+
+		filepath := path.Join(config.DownloaderOutputDirectory, info.Filename)
+		if err := client.FPutObject(ctx, info.Filename, filepath, miniodriver.Tags{}); err != nil {
+			Cache.SetFailed(id)
+			return err
+		}
 	}
 
 	return nil

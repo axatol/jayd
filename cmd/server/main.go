@@ -10,27 +10,22 @@ import (
 
 	"github.com/axatol/jayd/config"
 	"github.com/axatol/jayd/downloader"
+	"github.com/axatol/jayd/downloader/miniodriver"
 	"github.com/axatol/jayd/server"
 	"github.com/rs/zerolog/log"
 )
 
 func main() {
-	log.Info().
-		Str("file", config.ServerBackupFile).
-		Msg("loading cache from file")
+	config.Print()
 
 	if err := downloader.CreateCache(config.ServerBackupFile); err != nil {
 		log.Error().
 			Err(err).
 			Str("file", config.ServerBackupFile).
-			Msg("could not load cache from backup")
+			Msg("could not load cache from backup, will initialise from scratch")
 	}
 
 	defer func() {
-		log.Info().
-			Str("file", config.ServerBackupFile).
-			Msg("saving cache to file")
-
 		if err := downloader.SaveCache(config.ServerBackupFile); err != nil {
 			log.Error().
 				Err(err).
@@ -38,6 +33,14 @@ func main() {
 				Msg("could not save cache to backup")
 		}
 	}()
+
+	if config.StorageEnabled {
+		if _, err := miniodriver.AssertClient(context.Background()); err != nil {
+			log.Fatal().
+				Err(err).
+				Msg("failed to initialise storage driver")
+		}
+	}
 
 	server := server.Init()
 	go func() {
