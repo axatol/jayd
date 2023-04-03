@@ -2,7 +2,7 @@ import "antd/dist/reset.css";
 import "./main.css";
 
 import { Auth0Provider } from "@auth0/auth0-react";
-import React from "react";
+import React, { PropsWithChildren } from "react";
 import ReactDOM from "react-dom/client";
 import {
   createBrowserRouter,
@@ -19,8 +19,12 @@ const router = createBrowserRouter([
   { path: "/logout", element: <Logout /> },
 ]);
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
+const Auth = (props: PropsWithChildren<{ enabled?: boolean }>) => {
+  if (!config.auth0.enabled) {
+    return <>{props.children}</>;
+  }
+
+  return (
     <Auth0Provider
       domain={config.auth0.domain}
       clientId={config.auth0.clientId}
@@ -31,7 +35,15 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         scope: config.api.scope,
       }}
     >
-      <RouterProvider router={router} />
+      {props.children}
     </Auth0Provider>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+  <React.StrictMode>
+    <Auth enabled={config.auth0.enabled}>
+      <RouterProvider router={router} />
+    </Auth>
   </React.StrictMode>,
 );

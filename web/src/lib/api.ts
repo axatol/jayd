@@ -22,7 +22,7 @@ export const useAPI = () => {
   const { getAccessTokenSilently } = useAuth0();
 
   useEffect(() => {
-    if (tokenInterceptorId === undefined) {
+    if (tokenInterceptorId === undefined && config.auth0.enabled) {
       tokenInterceptorId = api.interceptors.request.use(async (request) => {
         const token = await getAccessTokenSilently();
         request.headers.set("Authorization", `Bearer ${token}`);

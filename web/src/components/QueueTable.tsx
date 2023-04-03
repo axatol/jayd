@@ -120,12 +120,14 @@ const Actions = (props: { item: QueueItem }) => {
         />
       )}
 
-      <Button
-        danger
-        icon={<DeleteOutlined />}
-        shape="circle"
-        onClick={() => api.deleteQueueItem(data.id, format_id)}
-      />
+      {completed && (
+        <Button
+          danger
+          icon={<DeleteOutlined />}
+          shape="circle"
+          onClick={() => api.deleteQueueItem(data.id, format_id)}
+        />
+      )}
     </Space>
   );
 };

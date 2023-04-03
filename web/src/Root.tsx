@@ -5,16 +5,25 @@ import { useNavigate } from "react-router-dom";
 
 import { App } from "./App";
 import { Centre } from "./components/Centre";
+import { config } from "./config";
 
 export const Root = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading, error, loginWithRedirect } = useAuth0();
 
   useEffect(() => {
+    if (!config.auth0.enabled) {
+      return;
+    }
+
     if (!isLoading && !isAuthenticated && !error) {
       loginWithRedirect({ appState: { returnTo: window.location.pathname } });
     }
   }, [isLoading, isAuthenticated, error]);
+
+  if (!config.auth0.enabled) {
+    return <App />;
+  }
 
   if (isLoading) {
     return (
@@ -31,6 +40,7 @@ export const Root = () => {
         <Typography.Text strong style={{ paddingBottom: 8 }}>
           Something went wrong: {error.message}
         </Typography.Text>
+
         <Button
           type="primary"
           shape="round"

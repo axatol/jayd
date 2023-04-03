@@ -1,5 +1,6 @@
 export const config = {
   auth0: {
+    enabled: import.meta.env.VITE_AUTH0_ENABLED === "true",
     domain: import.meta.env.VITE_AUTH0_DOMAIN,
     clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
     callbackUri: window.location.origin,

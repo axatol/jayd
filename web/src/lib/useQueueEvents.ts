@@ -46,14 +46,16 @@ export const useQueueEvents = () => {
   const mounted = useRef(true);
   const [items, dispatch] = useReducer(reducer, []);
   const { lastJsonMessage } = useWebSocket(`${baseUrl}/ws/queue`, {
-    onError: (e) => console.error(e),
+    onError: console.error,
     shouldReconnect: () => mounted.current,
   });
 
   // TODO ping
 
   useEffect(() => {
-    console.log("useEffect", lastJsonMessage);
+    if (import.meta.env.DEV) {
+      console.log("useEffect", lastJsonMessage);
+    }
 
     if (!lastJsonMessage) {
       return;
