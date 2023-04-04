@@ -5,8 +5,8 @@ import (
 	"time"
 
 	ds "github.com/axatol/go-utils/datastructures"
-	"github.com/axatol/jayd/downloader"
-	"github.com/axatol/jayd/server/ws"
+	"github.com/axatol/jayd/pkg/downloader"
+	"github.com/axatol/jayd/pkg/server/ws"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"

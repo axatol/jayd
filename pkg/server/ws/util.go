@@ -6,7 +6,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/axatol/jayd/config"
+	"github.com/axatol/jayd/pkg/config"
 	"github.com/rs/zerolog/log"
 )
 

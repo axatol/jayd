@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/axatol/jayd/config"
-	"github.com/axatol/jayd/config/nr"
+	"github.com/axatol/jayd/pkg/config"
+	"github.com/axatol/jayd/pkg/config/nr"
 	"github.com/rs/zerolog/log"
 )
 

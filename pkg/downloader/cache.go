@@ -6,7 +6,7 @@ import (
 	"path"
 
 	ds "github.com/axatol/go-utils/datastructures"
-	"github.com/axatol/jayd/config"
+	"github.com/axatol/jayd/pkg/config"
 	"github.com/rs/zerolog/log"
 )
 

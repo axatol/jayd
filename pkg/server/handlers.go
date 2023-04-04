@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	fp "github.com/axatol/go-utils/functional"
-	"github.com/axatol/jayd/downloader"
-	"github.com/axatol/jayd/downloader/miniodriver"
-	"github.com/axatol/jayd/youtube"
+	"github.com/axatol/jayd/pkg/downloader"
+	"github.com/axatol/jayd/pkg/downloader/miniodriver"
+	"github.com/axatol/jayd/pkg/youtube"
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog/log"
 )

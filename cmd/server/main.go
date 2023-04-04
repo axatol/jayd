@@ -8,10 +8,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/axatol/jayd/config"
-	"github.com/axatol/jayd/downloader"
-	"github.com/axatol/jayd/downloader/miniodriver"
-	"github.com/axatol/jayd/server"
+	"github.com/axatol/jayd/pkg/config"
+	"github.com/axatol/jayd/pkg/downloader"
+	"github.com/axatol/jayd/pkg/downloader/miniodriver"
+	"github.com/axatol/jayd/pkg/server"
 	"github.com/rs/zerolog/log"
 )
 

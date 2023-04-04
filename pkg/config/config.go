@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/axatol/jayd/config/nr"
+	"github.com/axatol/jayd/pkg/config/nr"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

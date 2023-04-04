@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/axatol/jayd/config"
+	"github.com/axatol/jayd/pkg/config"
 )
 
 type YoutubeVideo struct {

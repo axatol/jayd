@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/axatol/jayd/config"
-	"github.com/axatol/jayd/config/nr"
-	"github.com/axatol/jayd/downloader/miniodriver"
+	"github.com/axatol/jayd/pkg/config"
+	"github.com/axatol/jayd/pkg/config/nr"
+	"github.com/axatol/jayd/pkg/downloader/miniodriver"
 	"github.com/rs/zerolog/log"
 )
 

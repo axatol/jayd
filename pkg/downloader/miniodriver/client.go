@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/axatol/jayd/config"
-	"github.com/axatol/jayd/config/nr"
+	"github.com/axatol/jayd/pkg/config"
+	"github.com/axatol/jayd/pkg/config/nr"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/tags"
