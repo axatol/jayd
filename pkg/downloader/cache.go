@@ -50,6 +50,9 @@ func createCache(initial ...map[string]ds.AsyncMapItem[InfoJSON]) {
 }
 
 func CreateCache(filename string) error {
+	mapping := map[string]ds.AsyncMapItem[InfoJSON]{}
+	defer createCache(mapping)
+
 	raw, err := os.ReadFile(filename)
 	if err != nil {
 		return err
@@ -60,12 +63,10 @@ func CreateCache(filename string) error {
 		return err
 	}
 
-	mapping := make(map[string]ds.AsyncMapItem[InfoJSON], len(items))
 	for _, item := range items {
 		mapping[item.ID] = item
 	}
 
-	createCache(mapping)
 	return nil
 }
 
