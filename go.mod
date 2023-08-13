@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/auth0/go-jwt-middleware/v2 v2.1.0
-	github.com/axatol/go-utils v0.0.12
+	github.com/axatol/go-utils v0.0.13
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-chi/cors v1.2.1
 	github.com/gorilla/websocket v1.5.0

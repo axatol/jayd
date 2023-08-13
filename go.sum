@@ -4,6 +4,8 @@ github.com/auth0/go-jwt-middleware/v2 v2.1.0 h1:VU4LsC3aFPoqXVyEp8EixU6FNM+ZNIjE
 github.com/auth0/go-jwt-middleware/v2 v2.1.0/go.mod h1:CpzcJoleayAACpv+vt0AP8/aYn5TDngsqzLapV1nM4c=
 github.com/axatol/go-utils v0.0.12 h1:HDwXQyhXViMVZhldMEyJzIGS2AN5Hid/h5KqmCBqdQc=
 github.com/axatol/go-utils v0.0.12/go.mod h1:CiZlJsqJgM0DDB/NrXnM2keQ+18ADF6398ABCchG3SM=
+github.com/axatol/go-utils v0.0.13 h1:DMWJhiIS9SBC2ECdPxuN+B5fmg1yqKdOniPGoMQRHl8=
+github.com/axatol/go-utils v0.0.13/go.mod h1:CiZlJsqJgM0DDB/NrXnM2keQ+18ADF6398ABCchG3SM=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/coreos/go-systemd/v22 v22.3.3-0.20220203105225-a9a7ef127534/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
