@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	App     *newrelic.Application = nil
+	App     *newrelic.Application
 	Enabled bool
 )
 

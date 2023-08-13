@@ -118,6 +118,7 @@ func Print() {
 		Str("DownloaderCacheDirectory", DownloaderCacheDirectory).
 		Int("DownloaderRetries", DownloaderRetries).
 		Int("DownloaderConcurrency", DownloaderConcurrency).
+		Bool("NewRelicEnabled", nr.Enabled).
 		Str("ServerBackupFile", ServerBackupFile).
 		Str("ServerAddress", ServerAddress).
 		Str("ServerCORSList", ServerCORSList).

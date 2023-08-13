@@ -19,7 +19,7 @@ func main() {
 	config.Print()
 
 	if err := downloader.CreateCache(config.ServerBackupFile); err != nil {
-		log.Error().
+		log.Warn().
 			Err(err).
 			Str("file", config.ServerBackupFile).
 			Msg("could not load cache from backup, will initialise from scratch")
