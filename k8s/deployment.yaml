@@ -22,3 +22,5 @@ spec:
                 name: jayd-config
             - secretRef:
                 name: jayd-credentials
+          securityContext:
+            runAsUser: 1000

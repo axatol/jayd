@@ -1,4 +1,4 @@
-FROM node:18 as web
+FROM node:18-alpine as web
 WORKDIR /app
 COPY ./package.json ./package-lock.json ./
 COPY ./web/package.json ./web/package.json
@@ -9,14 +9,15 @@ ARG AUTH0_DOMAIN
 ARG AUTH0_CLIENT_ID
 ARG API_URL
 ARG API_AUDIENCE
+ARG NODE_ENV=production
 ENV VITE_AUTH0_DOMAIN=${AUTH0_DOMAIN}
 ENV VITE_AUTH0_CLIENT_ID=${AUTH0_CLIENT_ID}
 ENV VITE_API_URL=${API_URL}
 ENV VITE_API_AUDIENCE=${API_AUDIENCE}
-
+ENV NODE_ENV=${NODE_ENV}
 RUN npm run build
 
-FROM golang:1.19 as server
+FROM golang:1.20-alpine as server
 ENV CGO_ENABLED=0
 ENV GOOS=linux
 ENV GOARCH=amd64

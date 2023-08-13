@@ -14,7 +14,8 @@ import (
 var (
 	_ = godotenv.Load()
 
-	Debug = envValueBool("DEBUG", false)
+	Debug     = envValueBool("DEBUG", false)
+	LogFormat = envValue("LOG_FORMAT", "json")
 
 	Auth0Enabled  = envValueBool("AUTH0_ENABLED", false)
 	Auth0Domain   = envValue("AUTH0_DOMAIN", "")
@@ -43,6 +44,7 @@ var (
 
 func init() {
 	flag.BoolVar(&Debug, "debug", Debug, "enable debug mode")
+	flag.StringVar(&LogFormat, "log-format", LogFormat, "set log format")
 
 	flag.BoolVar(&Auth0Enabled, "auth0-enabled", Auth0Enabled, "auth0 enabled")
 	flag.StringVar(&Auth0Domain, "auth0-domain", Auth0Domain, "auth0 domain")
@@ -71,8 +73,11 @@ func init() {
 	flag.Parse()
 
 	if Debug {
-		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		zerolog.SetGlobalLevel(zerolog.TraceLevel)
+	}
+
+	if LogFormat == "text" {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 	}
 
 	if Auth0Enabled && (Auth0Domain == "" || Auth0Audience == "") {
@@ -92,6 +97,10 @@ func init() {
 }
 
 func obscure(input string, visiblePrefix int) string {
+	if len(input) < 1 {
+		return ""
+	}
+
 	visible := input[0:visiblePrefix]
 	obscured := strings.Repeat("*", len(input)-visiblePrefix)
 	return visible + obscured
@@ -100,6 +109,7 @@ func obscure(input string, visiblePrefix int) string {
 func Print() {
 	log.Debug().
 		Bool("Debug", Debug).
+		Str("LogFormat", LogFormat).
 		Bool("Auth0Enabled", Auth0Enabled).
 		Str("Auth0Domain", Auth0Domain).
 		Str("Auth0Audience", Auth0Audience).

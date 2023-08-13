@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 
 	"github.com/axatol/jayd/pkg/config"
 )
@@ -47,14 +48,19 @@ func (c *Client) Video(ctx context.Context, id string) (*Video, error) {
 		return nil, fmt.Errorf("youtube api key is not available")
 	}
 
-	target := fmt.Sprintf(
-		"https://www.googleapis.com/youtube/v3/videos?key=%s&id=%s&part=%s",
-		config.YoutubeAPIKey,
-		id,
-		"snippet,contentDetails",
-	)
+	query := url.Values{}
+	query.Add("key", config.YoutubeAPIKey)
+	query.Add("id", id)
+	query.Add("part", "snippet,contentDetails")
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, target, http.NoBody)
+	target := url.URL{
+		Scheme:   "https",
+		Host:     "www.googleapis.com",
+		Path:     "/youtube/v3/videos",
+		RawQuery: query.Encode(),
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, target.String(), http.NoBody)
 	if err != nil {
 		return nil, err
 	}

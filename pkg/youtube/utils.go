@@ -26,10 +26,10 @@ func ParseURL(input string) (*URLQuery, error) {
 	normalised = strings.Replace(normalised, "music.youtube.com", "youtube.com", 1)
 	normalised = strings.Replace(normalised, "youtu.be/", "youtube.com/watch?v=", 1)
 	normalised = strings.Replace(normalised, "youtube.com/embed/", "youtube.com/watch?v=", 1)
+	normalised = strings.Replace(normalised, "youtube.com/shorts/", "youtube.com/watch?v=", 1)
 	normalised = strings.Replace(normalised, "/v/", "/watch?v=", 1)
 	normalised = strings.Replace(normalised, "/watch#", "/watch?", 1)
 	normalised = strings.Replace(normalised, "/playlist", "/watch", 1)
-	normalised = strings.Replace(normalised, "youtube.com/shorts/", "youtube.com/watch?v=", 1)
 
 	parsed, err := url.Parse(normalised)
 	if err != nil {
