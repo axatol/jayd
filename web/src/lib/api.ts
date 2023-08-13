@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { APIResponse, QueueItem, YoutubeInfoJSON } from "./types";
 import { config } from "../config";
 
-const api = axios.create({ baseURL: config.api.baseUrl });
+const api = axios.create();
 let tokenInterceptorId: number | undefined;
 let sanitiseInterceptorId: number | undefined;
 

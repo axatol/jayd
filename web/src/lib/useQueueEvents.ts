@@ -2,9 +2,6 @@ import { useEffect, useReducer, useRef } from "react";
 import useWebSocket from "react-use-websocket";
 
 import { QueueEvent, QueueItem } from "./types";
-import { config } from "../config";
-
-const baseUrl = config.api.baseUrl.replace(/^http/, "ws");
 
 const reducer = (
   queue: QueueItem[],
@@ -45,10 +42,10 @@ const reducer = (
 export const useQueueEvents = () => {
   const mounted = useRef(true);
   const [items, dispatch] = useReducer(reducer, []);
-  const { lastJsonMessage } = useWebSocket(`${baseUrl}/ws/queue`, {
-    onError: console.error,
-    shouldReconnect: () => mounted.current,
-  });
+  const { lastJsonMessage } = useWebSocket(
+    `${window.location.origin.replace(/^http/, "ws")}/ws/queue`,
+    { onError: console.error, shouldReconnect: () => mounted.current },
+  );
 
   // TODO ping
 
