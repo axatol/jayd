@@ -6,17 +6,21 @@ import { SearchForm } from "./components/SearchForm";
 import { YoutubeMetadataCard } from "./components/YoutubeMetadataCard";
 import { useAPI } from "./lib/api";
 import { YoutubeInfoJSON } from "./lib/types";
-import { useQueueEvents } from "./lib/useQueueEvents";
+import { useQueuePoll } from "./lib/useQueuePoll";
 
 export const App = () => {
   const api = useAPI();
   const [form] = Form.useForm<{ target: string }>();
   const [metadata, setMetadata] = useState<YoutubeInfoJSON>();
-  const queue = useQueueEvents();
+  const { queue, refreshQueue, pollIfPending } = useQueuePoll();
 
   useEffect(() => {
-    api.getQueue().then((response) => queue.set(response.data));
+    refreshQueue();
   }, []);
+
+  useEffect(() => {
+    pollIfPending();
+  }, [queue]);
 
   const onReset = () => {
     form.resetFields();
@@ -26,6 +30,7 @@ export const App = () => {
   const onConfirm = async (videoId: string, formatId: string) => {
     onReset();
     await api.beginDownload(videoId, formatId);
+    await refreshQueue();
   };
 
   return (
@@ -38,7 +43,7 @@ export const App = () => {
           onReset={onReset}
         />
       )}
-      <QueueTable queue={queue.items} />
+      <QueueTable queue={queue} />
     </Space>
   );
 };

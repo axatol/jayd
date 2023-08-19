@@ -3,13 +3,14 @@ import {
   ReloadOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
-import { Table, Image, Card, Tag, Space, Button, Tooltip } from "antd";
+import { Table, Image, Card, Tag, Space, Button } from "antd";
 
 import { AsyncButton } from "./AsyncButton";
 import { DownloadButton } from "./DownloadButton";
 import { YoutubeChannelLink, YoutubeVideoLink } from "./Links";
 import { useAPI } from "../lib/api";
 import { QueueItem, VideoFormat } from "../lib/types";
+import { useQueuePoll } from "../lib/useQueuePoll";
 
 export const QueueTable = (props: { queue?: QueueItem[] }) => (
   <Card hoverable style={{ cursor: "auto" }} bodyStyle={{ padding: 0 }}>
@@ -82,6 +83,7 @@ export const QueueTable = (props: { queue?: QueueItem[] }) => (
 );
 
 const Actions = (props: { item: QueueItem }) => {
+  const { refreshQueue } = useQueuePoll();
   const { completed, failed, data } = props.item;
   const { id, format_id, filename } = data;
   const api = useAPI();
@@ -92,6 +94,7 @@ const Actions = (props: { item: QueueItem }) => {
       format_id,
       true,
     );
+    await refreshQueue();
   };
 
   return (
