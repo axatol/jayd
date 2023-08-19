@@ -37,7 +37,7 @@ RUN apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-RUN curl -L https://github.com/ytdl-patched/yt-dlp/releases/download/2023.02.17.334/yt-dlp -o /usr/local/bin/yt-dlp \
+RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/download/2023.07.06/yt-dlp -o /usr/local/bin/yt-dlp \
   && chmod a+rx /usr/local/bin/yt-dlp
 
 WORKDIR /go/app
