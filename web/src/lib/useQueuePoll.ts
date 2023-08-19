@@ -4,7 +4,7 @@ import { useAPI } from "./api";
 import { QueueItem } from "./types";
 
 export const useQueuePoll = () => {
-  const timeout = useRef<NodeJS.Timeout>();
+  const timeout = useRef<ReturnType<typeof setTimeout>>();
   const api = useAPI();
   const [polling, setPolling] = useState(false);
   const [pending, setPending] = useState(false);
