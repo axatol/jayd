@@ -38,6 +38,9 @@ func Download(ctx context.Context, info InfoJSON, formatID string, overwrite boo
 	info.Filename = renderItemFilename(info)
 	formatType := selectFormatType(info.Formats)
 
+	Cache.Add(id, info, overwrite)
+	defer Cache.SetCompleted(id)
+
 	if info.Ext == "" {
 		Cache.SetFailed(id)
 		return fmt.Errorf("could not determine format extension")
@@ -49,14 +52,6 @@ func Download(ctx context.Context, info InfoJSON, formatID string, overwrite boo
 		Str("format_type", string(formatType)).
 		Bool("overwrite", overwrite).
 		Msg("downloading")
-
-	if overwrite {
-		Cache.Set(id, info)
-	} else {
-		Cache.Add(id, info)
-	}
-
-	defer Cache.SetCompleted(id)
 
 	if err := executeYTDL(info.VideoID, formatID, formatType); err != nil {
 		Cache.SetFailed(id)

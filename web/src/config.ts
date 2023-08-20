@@ -11,4 +11,5 @@ export const config = {
     audience: import.meta.env.VITE_API_AUDIENCE,
     scope: ["read:youtube_metadata", "create:youtube_download"].join(" "),
   },
+  commitSha: import.meta.env.VITE_COMMIT_SHA,
 };

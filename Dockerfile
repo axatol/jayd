@@ -6,15 +6,18 @@ RUN npm install
 COPY ./web ./web
 
 ARG AUTH0_DOMAIN
-ARG AUTH0_CLIENT_ID
-ARG API_URL
-ARG API_AUDIENCE
-ARG NODE_ENV=production
 ENV VITE_AUTH0_DOMAIN=${AUTH0_DOMAIN}
+ARG AUTH0_CLIENT_ID
 ENV VITE_AUTH0_CLIENT_ID=${AUTH0_CLIENT_ID}
+ARG API_URL
 ENV VITE_API_URL=${API_URL}
+ARG API_AUDIENCE
 ENV VITE_API_AUDIENCE=${API_AUDIENCE}
+ARG COMMIT_SHA
+ENV VITE_COMMIT_SHA=${COMMIT_SHA}
+ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
+
 RUN npm run build
 
 FROM golang:1.20-alpine as server
@@ -23,7 +26,7 @@ ENV GOOS=linux
 ENV GOARCH=amd64
 
 WORKDIR /go/app
-COPY go.* ./
+COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 RUN go build -o /bin/app ./cmd/server/main.go

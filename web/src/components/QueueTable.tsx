@@ -3,14 +3,14 @@ import {
   ReloadOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
-import { Table, Image, Card, Tag, Space, Button } from "antd";
+import { Table, Image, Card, Tag, Space } from "antd";
 
 import { AsyncButton } from "./AsyncButton";
 import { DownloadButton } from "./DownloadButton";
 import { YoutubeChannelLink, YoutubeVideoLink } from "./Links";
 import { useAPI } from "../lib/api";
+import { useQueue } from "../lib/QueueContext";
 import { QueueItem, VideoFormat } from "../lib/types";
-import { useQueuePoll } from "../lib/useQueuePoll";
 
 export const QueueTable = (props: { queue?: QueueItem[] }) => (
   <Card hoverable style={{ cursor: "auto" }} bodyStyle={{ padding: 0 }}>
@@ -22,37 +22,37 @@ export const QueueTable = (props: { queue?: QueueItem[] }) => (
           key: "thumbnail",
           title: "Thumbnail",
           align: "center",
-          dataIndex: ["data", "thumbnail"],
-          render: (thumbnail, { data }) => (
+          dataIndex: ["info", "thumbnail"],
+          render: (thumbnail, { info: data }) => (
             <Image src={thumbnail} alt={data.title} style={{ maxWidth: 100 }} />
           ),
         },
         {
           key: "title",
           title: "Title",
-          dataIndex: ["data", "title"],
-          render: (title, { data }) => (
+          dataIndex: ["info", "title"],
+          render: (title, { info: data }) => (
             <YoutubeVideoLink id={data.id} title={title} />
           ),
         },
         {
           key: "uploader",
           title: "Uploader",
-          dataIndex: ["data", "uploader"],
-          render: (uploader, { data }) => (
+          dataIndex: ["info", "uploader"],
+          render: (uploader, { info: data }) => (
             <YoutubeChannelLink id={data.uploader_id} name={uploader} />
           ),
         },
         {
           key: "duration",
           title: "Duration",
-          dataIndex: ["data", "duration_string"],
+          dataIndex: ["info", "duration_string"],
         },
         {
           key: "format",
           title: "Format",
-          dataIndex: ["data", "formats"],
-          render: (_, { data }) => (
+          dataIndex: ["info", "formats"],
+          render: (_, { info: data }) => (
             <Space direction="vertical">
               {data.formats.map((format) => (
                 <Format key={format.format_id} format={format} />
@@ -63,13 +63,25 @@ export const QueueTable = (props: { queue?: QueueItem[] }) => (
         {
           key: "filesize",
           title: "Filesize",
-          render: (_, { data }) => {
+          render: (_, { info: data }) => {
             const total = data.formats.reduce(
               (total, { filesize }) => total + filesize,
               0,
             );
 
             return `${(total / 1000000).toFixed(2)} MB`;
+          },
+        },
+        {
+          key: "added_at",
+          title: "Added at",
+          render: ({ added_at }) => {
+            const date = new Date(added_at);
+            return (
+              <>
+                {date.toLocaleDateString()} {date.toLocaleTimeString()}
+              </>
+            );
           },
         },
         {
@@ -83,18 +95,23 @@ export const QueueTable = (props: { queue?: QueueItem[] }) => (
 );
 
 const Actions = (props: { item: QueueItem }) => {
-  const { refreshQueue } = useQueuePoll();
-  const { completed, failed, data } = props.item;
+  const queue = useQueue();
+  const { completed_at: completed, failed_at: failed, info: data } = props.item;
   const { id, format_id, filename } = data;
   const api = useAPI();
 
-  const retry = async () => {
+  const retryDownload = async () => {
     await api.beginDownload(
       `https://youtube.com/watch?v=${id}`,
       format_id,
       true,
     );
-    await refreshQueue();
+    queue.poll();
+  };
+
+  const deleteItem = (target: string, format: string) => async () => {
+    await api.deleteQueueItem(target, format);
+    queue.poll();
   };
 
   return (
@@ -113,7 +130,7 @@ const Actions = (props: { item: QueueItem }) => {
             tooltip="Retry"
             shape="circle"
             icon={<ReloadOutlined />}
-            onClick={retry}
+            onClick={retryDownload}
           />
         </>
       ) : (
@@ -124,11 +141,11 @@ const Actions = (props: { item: QueueItem }) => {
       )}
 
       {completed && (
-        <Button
+        <AsyncButton
           danger
           icon={<DeleteOutlined />}
           shape="circle"
-          onClick={() => api.deleteQueueItem(data.id, format_id)}
+          onClick={deleteItem(data.id, format_id)}
         />
       )}
     </Space>

@@ -7,11 +7,10 @@ const reducer = (
   queue: QueueItem[],
   event: QueueEvent | { action: "set"; items: QueueItem[] },
 ) => {
-  if (event.action === "set") {
-    return event.items;
-  }
-
   switch (event.action) {
+    case "set":
+      return event.items;
+
     case "added":
       if (queue.find((item) => item.id === event.item.id)) {
         return queue.map((item) =>
@@ -22,13 +21,9 @@ const reducer = (
       return [...queue, event.item];
 
     case "completed":
-      return queue.map((item) =>
-        item.id === event.item.id ? { ...item, completed: true } : item,
-      );
-
     case "failed":
       return queue.map((item) =>
-        item.id === event.item.id ? { ...item, failed: true } : item,
+        item.id === event.item.id ? event.item : item,
       );
 
     case "removed":
@@ -42,16 +37,17 @@ const reducer = (
 export const useQueueEvents = () => {
   const mounted = useRef(true);
   const [items, dispatch] = useReducer(reducer, []);
-  const { lastJsonMessage } = useWebSocket(
-    `${window.location.origin.replace(/^http/, "ws")}/ws/queue`,
-    { onError: console.error, shouldReconnect: () => mounted.current },
-  );
+  const wsUrl = `${window.location.origin.replace(/^http/, "ws")}/ws/queue`;
+  const { lastJsonMessage } = useWebSocket(wsUrl, {
+    onError: console.error,
+    shouldReconnect: () => mounted.current,
+  });
 
   // TODO ping
 
   useEffect(() => {
     if (import.meta.env.DEV) {
-      console.log("useEffect", lastJsonMessage);
+      console.log("useEffect", { wsUrl, lastJsonMessage });
     }
 
     if (!lastJsonMessage) {

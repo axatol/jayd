@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { App } from "./App";
 import { Centre } from "./components/Centre";
 import { config } from "./config";
+import { QueueProvider } from "./lib/QueueContext";
 
 export const Root = () => {
   const navigate = useNavigate();
@@ -21,11 +22,7 @@ export const Root = () => {
     }
   }, [isLoading, isAuthenticated, error]);
 
-  if (!config.auth0.enabled) {
-    return <App />;
-  }
-
-  if (isLoading) {
+  if (config.auth0.enabled && isLoading) {
     return (
       <Centre>
         <Spin size="large" />
@@ -34,7 +31,7 @@ export const Root = () => {
     );
   }
 
-  if (error) {
+  if (config.auth0.enabled && error) {
     return (
       <Centre>
         <Typography.Text strong style={{ paddingBottom: 8 }}>
@@ -55,5 +52,9 @@ export const Root = () => {
     );
   }
 
-  return <App />;
+  return (
+    <QueueProvider>
+      <App />
+    </QueueProvider>
+  );
 };

@@ -35,6 +35,7 @@ jobs:
       - uses: axatol/actions/docker-build-push@release
         with:
           image: ${{ env.image }}
+          build-args: --build-arg COMMIT_SHA=${{ github.sha }}
 
       - uses: axatol/actions/prune-ecr-repository@release
         with:

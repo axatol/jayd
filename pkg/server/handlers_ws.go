@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"time"
 
-	ds "github.com/axatol/go-utils/datastructures"
 	"github.com/axatol/jayd/pkg/downloader"
 	"github.com/axatol/jayd/pkg/server/ws"
 	"github.com/go-chi/chi/v5/middleware"
@@ -27,10 +26,6 @@ func handler_QueueEvents(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 	conn.EnableWriteCompression(true)
 
-	requestID := r.Context().Value(middleware.RequestIDKey)
-	events := make(chan ds.AsyncMapEvent[downloader.InfoJSON], 1)
-	downloader.CacheEvents.Subscribe((requestID).(string), events)
-
 	done := make(chan struct{})
 	go func() {
 		for {
@@ -48,13 +43,13 @@ func handler_QueueEvents(w http.ResponseWriter, r *http.Request) {
 		close(done)
 	}()
 
-	for loop := true; loop; {
-		select {
-		case <-done:
-			loop = false
-		case event := <-events:
-			conn.WriteJSON(event)
-		}
+	requestID := r.Context().Value(middleware.RequestIDKey).(string)
+	downloader.Cache.Subscribe(requestID, func(event downloader.CacheEvent) { conn.WriteJSON(event) })
+	defer downloader.Cache.Unsubscribe(requestID)
+
+	select {
+	case <-done:
+	case <-r.Context().Done():
 	}
 
 	if err := conn.WriteControl(websocket.CloseMessage, []byte{}, time.Now().Add(wsWriteDeadline)); err != nil && err != websocket.ErrCloseSent {

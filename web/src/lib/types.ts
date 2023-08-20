@@ -40,9 +40,10 @@ export interface YoutubeInfoJSON {
 
 export interface QueueItem {
   id: string;
-  completed: boolean;
-  failed: boolean;
-  data: YoutubeInfoJSON;
+  info: YoutubeInfoJSON;
+  added_at: number;
+  failed_at: number;
+  completed_at: number;
 }
 
 export interface QueueEvent {
