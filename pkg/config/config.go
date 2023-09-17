@@ -14,8 +14,8 @@ import (
 var (
 	_ = godotenv.Load()
 
-	Debug     = envValueBool("DEBUG", false)
 	LogFormat = envValue("LOG_FORMAT", "json")
+	LogLevel  = envValue("LOG_LEVEL", "info")
 
 	Auth0Enabled  = envValueBool("AUTH0_ENABLED", false)
 	Auth0Domain   = envValue("AUTH0_DOMAIN", "")
@@ -36,15 +36,19 @@ var (
 	StorageBucketName      = envValue("STORAGE_BUCKET_NAME", "jayd")
 	StorageAccessKeyID     = envValue("STORAGE_ACCESS_KEY_ID", "")
 	StorageSecretAccessKey = envValue("STORAGE_SECRET_ACCESS_KEY", "")
+	StorageSSLEnabled      = envValueBool("STORAGE_SSL_ENABLED", true)
 
 	WebDirectory = envValue("WEB_DIRECTORY", "/web")
 
 	YoutubeAPIKey = envValue("YOUTUBE_API_KEY")
+
+	BuildTime   = "unknown"
+	BuildCommit = "unknown"
 )
 
 func init() {
-	flag.BoolVar(&Debug, "debug", Debug, "enable debug mode")
 	flag.StringVar(&LogFormat, "log-format", LogFormat, "set log format")
+	flag.StringVar(&LogLevel, "log-level", LogLevel, "set log level")
 
 	flag.BoolVar(&Auth0Enabled, "auth0-enabled", Auth0Enabled, "auth0 enabled")
 	flag.StringVar(&Auth0Domain, "auth0-domain", Auth0Domain, "auth0 domain")
@@ -65,6 +69,7 @@ func init() {
 	flag.StringVar(&StorageBucketName, "storage-bucket-name", StorageBucketName, "storage bucket name")
 	flag.StringVar(&StorageAccessKeyID, "storage-access-key-id", StorageAccessKeyID, "storage access key id")
 	flag.StringVar(&StorageSecretAccessKey, "storage-secret-access-key", StorageSecretAccessKey, "storage secret access key")
+	flag.BoolVar(&StorageSSLEnabled, "storage-ssl-enabled", StorageSSLEnabled, "storage ssl enabled")
 
 	flag.StringVar(&WebDirectory, "web-directory", WebDirectory, "web directory")
 
@@ -72,8 +77,10 @@ func init() {
 
 	flag.Parse()
 
-	if Debug {
-		zerolog.SetGlobalLevel(zerolog.TraceLevel)
+	if level, err := zerolog.ParseLevel(LogLevel); err != nil {
+		log.Fatal().Err(err).Msg("failed to configure logger")
+	} else {
+		zerolog.SetGlobalLevel(level)
 	}
 
 	if LogFormat == "text" {
@@ -108,26 +115,27 @@ func obscure(input string, visiblePrefix int) string {
 
 func Print() {
 	log.Debug().
-		Bool("Debug", Debug).
-		Str("LogFormat", LogFormat).
-		Bool("Auth0Enabled", Auth0Enabled).
-		Str("Auth0Domain", Auth0Domain).
-		Str("Auth0Audience", Auth0Audience).
-		Str("DownloaderExecutable", DownloaderExecutable).
-		Str("DownloaderOutputDirectory", DownloaderOutputDirectory).
-		Str("DownloaderCacheDirectory", DownloaderCacheDirectory).
-		Int("DownloaderRetries", DownloaderRetries).
-		Int("DownloaderConcurrency", DownloaderConcurrency).
-		Bool("NewRelicEnabled", nr.Enabled).
-		Str("ServerBackupFile", ServerBackupFile).
-		Str("ServerAddress", ServerAddress).
-		Str("ServerCORSList", ServerCORSList).
-		Bool("StorageEnabled", StorageEnabled).
-		Str("StorageEndpoint", StorageEndpoint).
-		Str("StorageBucketName", StorageBucketName).
-		Str("StorageAccessKeyID", obscure(StorageAccessKeyID, 3)).
-		Str("StorageSecretAccessKey", obscure(StorageSecretAccessKey, 3)).
-		Str("WebDirectory", WebDirectory).
-		Str("YoutubeAPIKey", obscure(YoutubeAPIKey, 3)).
+		Str("log_format", LogFormat).
+		Str("log_level", LogLevel).
+		Bool("auth0_enabled", Auth0Enabled).
+		Str("auth0_domain", Auth0Domain).
+		Str("auth0_audience", Auth0Audience).
+		Str("downloader_executable", DownloaderExecutable).
+		Str("downloader_output_directory", DownloaderOutputDirectory).
+		Str("downloader_cache_directory", DownloaderCacheDirectory).
+		Int("downloader_retries", DownloaderRetries).
+		Int("downloader_concurrency", DownloaderConcurrency).
+		Bool("new_relic_enabled", nr.Enabled).
+		Str("server_backup_file", ServerBackupFile).
+		Str("server_address", ServerAddress).
+		Str("server_cors_list", ServerCORSList).
+		Bool("storage_enabled", StorageEnabled).
+		Str("storage_endpoint", StorageEndpoint).
+		Str("storage_bucket_name", StorageBucketName).
+		Str("storage_access_key_id", obscure(StorageAccessKeyID, 3)).
+		Str("storage_secret_access_key", obscure(StorageSecretAccessKey, 3)).
+		Bool("storage_ssl_enabled", StorageSSLEnabled).
+		Str("web_directory", WebDirectory).
+		Str("youtube_api_key", obscure(YoutubeAPIKey, 3)).
 		Send()
 }
