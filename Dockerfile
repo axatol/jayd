@@ -29,8 +29,11 @@ WORKDIR /go/app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-ARG BUILD_COMMIT=unknown
-RUN make build BUILD_COMMIT=${BUILD_COMMIT}
+ARG COMMIT_SHA=unknown
+RUN go build \
+  -o /bin/app \
+  -ldflags="-X 'github.com/axatol/jayd/pkg/config.BuildCommit=${COMMIT_SHA}' -X 'github.com/axatol/jayd/pkg/config.BuildTime=$(date +"%Y-%m-%dT%H:%M:%S%z")'" \
+  ./cmd/server/main.go
 
 FROM python:3.11-slim-bullseye
 RUN apt-get update \
