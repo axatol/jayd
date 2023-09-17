@@ -14,17 +14,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with: { show-progress: false }
+        with:
+          show-progress: false
 
       - uses: actions/setup-go@v4
-        with: { go-version-file: go.mod }
+        with:
+          cache: false
+          go-version-file: go.mod
 
       - run: |
           make deps
           make vet
 
       - uses: actions/setup-node@v3
-        with: { node-version-file: .nvmrc }
+        with:
+          cache: false
+          node-version-file: .nvmrc
 
       - run: |
           npm install
