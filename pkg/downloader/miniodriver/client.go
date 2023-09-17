@@ -34,7 +34,8 @@ func AssertClient(ctx context.Context) (*MinioClient, error) {
 		"",
 	)
 
-	client, err := minio.New(config.StorageEndpoint, &minio.Options{Creds: creds, Secure: true})
+	opts := minio.Options{Creds: creds, Secure: config.StorageSSLEnabled}
+	client, err := minio.New(config.StorageEndpoint, &opts)
 	if err != nil {
 		return nil, err
 	}
