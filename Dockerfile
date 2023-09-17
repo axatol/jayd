@@ -29,7 +29,8 @@ WORKDIR /go/app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN go build -o /bin/app ./cmd/server/main.go
+ARG BUILD_COMMIT=unknown
+RUN make build BUILD_COMMIT=${BUILD_COMMIT}
 
 FROM python:3.11-slim-bullseye
 RUN apt-get update \

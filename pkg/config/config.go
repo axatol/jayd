@@ -2,7 +2,9 @@ package config
 
 import (
 	"flag"
+	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/axatol/jayd/pkg/config/nr"
@@ -115,6 +117,10 @@ func obscure(input string, visiblePrefix int) string {
 
 func Print() {
 	log.Debug().
+		Str("build_time", BuildTime).
+		Str("build_commit", BuildCommit).
+		Str("go_environment", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)).
+		Str("go_version", runtime.Version()).
 		Str("log_format", LogFormat).
 		Str("log_level", LogLevel).
 		Bool("auth0_enabled", Auth0Enabled).

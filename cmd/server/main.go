@@ -50,7 +50,6 @@ func main() {
 	}()
 
 	log.Info().
-		Bool("debug", config.Debug).
 		Str("server_address", config.ServerAddress).
 		Msg("started server")
 

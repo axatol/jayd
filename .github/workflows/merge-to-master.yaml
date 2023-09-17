@@ -9,7 +9,25 @@ env:
   image: public.ecr.aws/axatol/jayd
 
 jobs:
+  check:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+        with: { show-progress: false }
+
+      - uses: actions/setup-go@v4
+        with: { go-version-file: go.mod }
+
+      - run: make vet
+
+      - uses: actions/setup-node@v3
+        with: { node-version-file: .nvmrc }
+
+      - run: npm run lint
+
   build:
+    needs: check
     runs-on: self-hosted
 
     permissions:
@@ -17,15 +35,12 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: aws-actions/configure-aws-credentials@v2
+      - uses: axatol/actions/assume-aws-role@release
         with:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.AWS_ECR_IMAGE_PUBLISHER_ROLE_ARN }}
-          role-session-name: ${{ github.triggering_actor }}@${{ github.repository_owner.login }}@${{ github.event.repository.name }}@${{ github.job }}@${{ github.run_id }}
-          role-skip-session-tagging: true
-          role-duration-seconds: 3600
 
       - uses: aws-actions/amazon-ecr-login@v1
         with:
