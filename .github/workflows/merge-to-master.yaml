@@ -28,7 +28,6 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          cache: false
           node-version-file: .nvmrc
 
       - run: |
